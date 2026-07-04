@@ -1377,3 +1377,197 @@ Branch notes:
   steering.
 - Interrupted tool-call repair keeps OpenAI-compatible transcripts valid after
   cancellation.
+
+## 35. Prompt-Injection Action Firewall
+
+```text
+Original user intent
+    |
+    v
++--------------------------+
+| Untrusted context enters |
+| web, email, files, RAG   |
++--------------------------+
+    |
+    v
++--------------------------+
+| Model proposes action    |
+| tool call / send / edit  |
++--------------------------+
+    |
+    v
++--------------------------+
+| Screen action against    |
+| original intent + policy |
++--------------------------+
+    | allow                    | block / escalate
+    v                          v
+Execute action             Human / refusal / safe route
+```
+
+Branch notes:
+
+- The guardrail checks the proposed action, not just the text that entered
+  context.
+- Keep original user intent separate from untrusted intermediate content.
+
+## 36. Capability / Least-Privilege Runtime
+
+```text
+Task intent
+    |
+    v
++--------------------------+
+| Derive required caps     |
++--------------------------+
+    |
+    v
++--------------------------+
+| Grant scoped tools/data  |
++--------------------------+
+    |
+    v
++--------------------------+
+| Run agent                |
++--------------------------+
+    |
+    v
++--------------------------+
+| Revoke / expire / audit  |
++--------------------------+
+```
+
+Branch notes:
+
+- The safest tool is the one the agent never receives.
+- Capability grants should be task-scoped and expire.
+
+## 37. Runtime Budget Policy Engine
+
+```text
+Run starts
+    |
+    v
++--------------------------+
+| Budget policy            |
+| tokens/time/tools/cost   |
++--------------------------+
+    |
+    v
++--------------------------+
+| Warn threshold reached?  |
++--------------------------+
+    | no                         yes
+    v                            v
+Continue                    Compress / ask / downshift
+    |
+    v
++--------------------------+
+| Hard limit reached?      |
++--------------------------+
+    | no                         yes
+    v                            v
+Continue                    Strip tools / checkpoint / stop
+```
+
+Branch notes:
+
+- Budgets are runtime control, not just billing telemetry.
+- Include delegation depth and tool-call budgets for multi-agent systems.
+
+## 38. Tool Reliability Scoring and Fallback
+
+```text
+Tool call
+   |
+   v
++--------------------------+
+| Execute tool             |
++--------------------------+
+   |
+   v
++--------------------------+
+| Record outcome           |
+| ok/error/latency/schema  |
++--------------------------+
+   |
+   v
++--------------------------+
+| Update reliability score |
++--------------------------+
+   |
+   v
++--------------------------+
+| Next route               |
++--------------------------+
+  | primary    | fallback    | quarantine | human
+  v            v             v            v
+Use tool    Use backup     Disable      Escalate
+```
+
+Branch notes:
+
+- Tool selection should account for observed reliability, not only capability.
+- Quarantine repeated schema mismatches or unsafe outputs.
+
+## 39. Artifact Provenance Graph
+
+```text
+Source / tool / model step
+    |
+    v
++--------------------------+
+| Claim or artifact        |
++--------------------------+
+    |
+    v
++--------------------------+
+| Provenance edge          |
+| source -> claim -> final |
++--------------------------+
+    |
+    v
++--------------------------+
+| Audit / replay / cite    |
++--------------------------+
+```
+
+Branch notes:
+
+- Store claim-to-evidence links, not only final text.
+- Provenance helps with citations, audits, replay, and debugging.
+
+## 40. Append-Only Session Event Log / Branchable Replay
+
+```text
+Runtime event
+    |
+    v
++--------------------------+
+| Append typed entry       |
+| message/model/leaf/etc.  |
++--------------------------+
+    |
+    v
++--------------------------+
+| Replay entries           |
++--------------------------+
+    |
+    v
++--------------------------+
+| Derive active state      |
++--------------------------+
+    |
+    v
++--------------------------+
+| Branch or compact?       |
++--------------------------+
+    | branch                    | compact
+    v                           v
+Root-to-leaf replay        Summary entry replaces older IDs
+```
+
+Branch notes:
+
+- Store durable events first; derive active context second.
+- Branching and compaction become replay rules, not destructive rewrites.

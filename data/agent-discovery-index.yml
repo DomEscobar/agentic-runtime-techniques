@@ -260,11 +260,15 @@ use_cases:
     recommended_stack:
       - "Risk classifier"
       - "Guardrail Pipeline"
+      - "Prompt-Injection Action Firewall"
+      - "Capability / Least-Privilege Runtime"
       - "HITL Interrupt / Approval Gate"
       - "Audit trail"
       - "Resume semantics"
     required_primitives:
       - risk policy
+      - original intent record
+      - scoped capability grant
       - pending action record
       - human approval branch
       - reject/edit branch
@@ -272,6 +276,7 @@ use_cases:
     optional_patterns:
       - "Run Receipt / Trace-First Runtime"
       - "Task Queue / Resumable Workflow Runtime"
+      - "Artifact Provenance Graph"
     failure_modes:
       - accidental external action
       - approval fatigue
@@ -350,6 +355,7 @@ composition_recipes:
       - "Task queue"
       - "Worker lease"
       - "Checkpoint/status"
+      - "Budget policy"
       - "HITL interrupt if risky"
       - "Retry/resume"
       - "Final artifact"
@@ -383,6 +389,8 @@ failure_mode_map:
     add:
       - "HITL Interrupt / Approval Gate"
       - "Guardrail Pipeline"
+      - "Prompt-Injection Action Firewall"
+      - "Capability / Least-Privilege Runtime"
   multi_agent_drift:
     add:
       - "Delegation ledger"
@@ -398,3 +406,24 @@ failure_mode_map:
       - "Task Queue / Resumable Workflow Runtime"
       - "Checkpoint"
       - "Retry/backoff"
+      - "Append-Only Session Event Log / Branchable Replay"
+  prompt_injection:
+    add:
+      - "Prompt-Injection Action Firewall"
+      - "Context Trust Zones"
+      - "Capability / Least-Privilege Runtime"
+  unbounded_consumption:
+    add:
+      - "Runtime Budget Policy Engine"
+      - "Token Budget Circuit Breaker"
+      - "Tool-call budget"
+  unreliable_tools:
+    add:
+      - "Tool Reliability Scoring and Fallback"
+      - "Schema diagnostics"
+      - "Tool quarantine"
+  missing_provenance:
+    add:
+      - "Artifact Provenance Graph"
+      - "Source ledger"
+      - "Run Receipt / Trace-First Runtime"

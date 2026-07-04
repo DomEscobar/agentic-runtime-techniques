@@ -478,3 +478,143 @@ techniques:
       - title: "Tau pure agent loop"
         url: "https://github.com/huggingface/tau/blob/main/src/tau_agent/loop.py"
         type: code
+
+  - name: Prompt-Injection Action Firewall
+    category: runtime_security
+    summary: Screen proposed tool calls and external actions against original user intent and trust-zone labels before execution.
+    loop_shape: user intent -> untrusted context -> proposed action -> action screening -> allow/block/escalate
+    runtime_primitives:
+      - original intent record
+      - trust-zone labels
+      - proposed action record
+      - action screening guardrail
+      - block/allow/human route
+      - audit event
+    solves:
+      - indirect prompt injection
+      - tool-call drift
+      - data exfiltration through tools
+    tradeoffs:
+      - false positives can interrupt useful work
+      - screening policy needs task context
+    sources:
+      - title: "OWASP LLM01 Prompt Injection"
+        url: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+        type: guide
+      - title: "OWASP LLM Prompt Injection Prevention Cheat Sheet"
+        url: "https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html"
+        type: guide
+
+  - name: Capability / Least-Privilege Runtime
+    category: access_control
+    summary: Grant only the scoped tools and data access required for a task, then revoke or expire capabilities after the run.
+    loop_shape: task intent -> derive capabilities -> grant scoped tools/data -> run -> revoke/audit
+    runtime_primitives:
+      - capability manifest
+      - scoped tool grants
+      - data-access scopes
+      - expiry/revocation
+      - audit log
+    solves:
+      - excessive agency
+      - accidental public or destructive action
+      - credential leakage
+    tradeoffs:
+      - requires capability modeling
+      - may block under-specified tasks
+    sources:
+      - title: "OpenAI agent builder safety guide"
+        url: "https://developers.openai.com/api/docs/guides/agent-builder-safety"
+        type: guide
+
+  - name: Runtime Budget Policy Engine
+    category: budget_enforcement
+    summary: Enforce token, time, tool-call, cost, and delegation budgets with warning thresholds and hard-stop behavior.
+    loop_shape: run -> budget policy -> warn/compress/downshift -> hard-stop/checkpoint
+    runtime_primitives:
+      - token budget
+      - time budget
+      - tool-call budget
+      - cost budget
+      - depth/handoff budget
+      - hard-stop action
+    solves:
+      - unbounded consumption
+      - runaway loops
+      - hidden cost spikes
+    tradeoffs:
+      - hard limits can stop useful work
+      - needs careful resume or summary behavior
+    sources:
+      - title: "OWASP Top 10 for LLM Applications"
+        url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        type: guide
+
+  - name: Tool Reliability Scoring and Fallback
+    category: tool_runtime
+    summary: Track tool success, errors, latency, schema mismatch, and quality to select primary, fallback, quarantine, or human routes.
+    loop_shape: tool call -> outcome record -> reliability score -> primary/fallback/quarantine route
+    runtime_primitives:
+      - tool registry
+      - schema diagnostics
+      - success/error counters
+      - latency records
+      - fallback tools
+      - quarantine state
+    solves:
+      - repeated broken tool calls
+      - schema drift
+      - unreliable tool selection
+    tradeoffs:
+      - reliability scoring needs history
+      - fallback behavior can hide root causes
+    sources:
+      - title: "OpenClaw/Hermes technique notes"
+        url: "docs/openclaw-hermes-techniques.md"
+        type: local
+
+  - name: Artifact Provenance Graph
+    category: provenance
+    summary: Store relationships from sources and tool calls to claims, artifacts, transformations, and final answers.
+    loop_shape: source/tool/model step -> claim/artifact -> provenance edge -> audit/replay/citation
+    runtime_primitives:
+      - artifact IDs
+      - claim IDs
+      - source IDs
+      - provenance edges
+      - transformation records
+      - redaction policy
+    solves:
+      - citation mismatch
+      - untraceable generated artifacts
+      - audit gaps
+    tradeoffs:
+      - provenance graph maintenance costs storage and discipline
+      - redaction policy becomes critical
+    sources:
+      - title: "OpenTelemetry GenAI semantic conventions"
+        url: "https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-agent-spans/"
+        type: spec
+
+  - name: Append-Only Session Event Log / Branchable Replay
+    category: durable_session_runtime
+    summary: Persist typed session entries append-only, reconstruct state by replay, and support branch paths, compaction entries, and active leaf selection.
+    loop_shape: append typed entry -> replay entries -> derive active state -> branch/compact/resume
+    runtime_primitives:
+      - append-only storage
+      - typed session entries
+      - parent IDs
+      - active leaf pointer
+      - root-to-leaf replay
+      - compaction entries
+    solves:
+      - durable resume
+      - branchable conversations
+      - audit-friendly compaction
+    tradeoffs:
+      - replay code must reject cycles and missing entries
+      - compaction must preserve provenance
+    sources:
+      - title: "Tau session primitives"
+        url: "https://github.com/huggingface/tau/tree/main/src/tau_agent/session"
+        type: code

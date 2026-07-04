@@ -51,6 +51,7 @@ Not included by default:
 - [OpenClaw and Hermes technique notes](docs/openclaw-hermes-techniques.md)
 - [DeerFlow technique notes](docs/deer-flow-techniques.md)
 - [Tau harness technique notes](docs/tau-harness-techniques.md)
+- [Security and governance runtime patterns](docs/security-governance-patterns.md)
 - [Supervisor and swarm technique notes](docs/supervisor-swarm-techniques.md)
 - [Additional runtime patterns](docs/additional-runtime-patterns.md)
 - [Machine-readable catalog](data/techniques.yml)
@@ -73,6 +74,7 @@ Not included by default:
    [OpenClaw/Hermes](docs/openclaw-hermes-techniques.md),
    [DeerFlow](docs/deer-flow-techniques.md),
    [Tau](docs/tau-harness-techniques.md),
+   [Security/Governance](docs/security-governance-patterns.md),
    [Supervisor/Swarm](docs/supervisor-swarm-techniques.md), and
    [Additional runtime patterns](docs/additional-runtime-patterns.md).
 

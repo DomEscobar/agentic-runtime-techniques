@@ -58,6 +58,7 @@ technique always beats another.
 | 2025+ | HITL interrupt / approval gate | Human-in-the-loop runtime | Production relevance is high for risky actions; evidence is mostly framework/runtime documentation rather than standalone benchmarks. | [LangChain HITL](https://docs.langchain.com/oss/python/langchain/human-in-the-loop), [LangGraph](https://docs.langchain.com/oss/python/langgraph/overview) |
 | 2025+ | Guardrail pipeline | Runtime policy and safety | Separates policy checks at input, tool, handoff, and output boundaries; benchmark evidence is indirect but runtime importance is clear. | [OpenAI guardrails](https://openai.github.io/openai-agents-python/guardrails/), [OpenAI tracing](https://openai.github.io/openai-agents-python/tracing/) |
 | 2025+ | Run receipt / trace-first runtime | Observability / audit | Essential for debugging, evaluation, and production support; evidence is operational rather than benchmark-based. | [OpenAI tracing](https://openai.github.io/openai-agents-python/tracing/), [OpenAI Agents guide](https://developers.openai.com/api/docs/guides/agents) |
+| 2025+ | Prompt-injection action firewall | Runtime security | Strong security rationale from OWASP/OpenAI guidance; the reusable runtime primitive is action screening against original intent and trust labels. | [OWASP LLM01](https://genai.owasp.org/llmrisk/llm01-prompt-injection/), [OWASP cheat sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html), [OpenAI safety](https://developers.openai.com/api/docs/guides/agent-builder-safety) |
 
 ## C Tier / Emerging
 
@@ -72,6 +73,11 @@ technique always beats another.
 | varies | Heartbeat / checkpoint loop | Long-running agent operations | Essential for assistants and background workers; usually evaluated operationally rather than with academic benchmarks. | [LangGraph docs](https://docs.langchain.com/oss/python/langgraph/overview), [Onyx article](https://x.com/i/article/2073112080140689408) |
 | varies | Context packing / compression loop | Context runtime | Critical for long-running agents, but public evidence is usually implementation-specific and hard to benchmark separately. | [DeerFlow notes](deer-flow-techniques.md), [OpenClaw notes](openclaw-hermes-techniques.md) |
 | varies | Task queue / resumable workflow runtime | Durable execution | Operationally necessary for background and long-running work; benchmark evidence is indirect and depends on the host runtime. | [LangGraph](https://docs.langchain.com/oss/python/langgraph/overview), [OpenClaw notes](openclaw-hermes-techniques.md) |
+| varies | Capability / least-privilege runtime | Access control | Security-critical for agents with powerful tools; evidence is security/architecture guidance rather than standalone benchmark evidence. | [OpenAI safety](https://developers.openai.com/api/docs/guides/agent-builder-safety), [OWASP LLM Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/) |
+| varies | Runtime budget policy engine | Budget enforcement | Important operational control for autonomous loops, delegation, and tool use; public evidence is implementation-specific. | [DeerFlow notes](deer-flow-techniques.md), [OWASP LLM Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/) |
+| varies | Tool reliability scoring and fallback | Tool runtime | Useful but still emerging as a named pattern; evidence mostly comes from implementation diagnostics and tool contract systems. | [OpenClaw notes](openclaw-hermes-techniques.md) |
+| varies | Artifact provenance graph | Provenance / audit | Strong auditability value, especially for research and generated artifacts; implementation standards are still evolving. | [OpenTelemetry GenAI](https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-agent-spans/) |
+| varies | Append-only session event log / branchable replay | Durable session runtime | Strong implementation evidence from Tau; makes resume, branching, compaction, and audit replay explicit. | [Tau session primitives](https://github.com/huggingface/tau/tree/main/src/tau_agent/session) |
 
 ## Cross-Cutting Techniques To Add Next
 
@@ -79,9 +85,6 @@ These belong in the repo but need more source work before tiering:
 
 - Query routing and intent classification
 - Long-context state summarization
-- Tool selection and tool reliability scoring
-- Prompt-injection defense loops
-- Runtime budget policies
 - Multi-agent communication protocols
 
 ## Read This Carefully

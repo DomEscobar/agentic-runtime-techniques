@@ -24,6 +24,11 @@ reliable for its job.
 | Interop with external tools | MCP layer | tool policy, schema validation, tracing | all tools are local and fixed |
 | Interop with remote agents | A2A layer | auth, agent cards, task artifacts | local tools/subagents are enough |
 | Production debugging/audit | Run receipts / tracing | redaction, replay, support bundle | no state/tool calls are involved |
+| Hostile or untrusted context | Prompt-injection action firewall | trust zones, least privilege, HITL | no untrusted context enters the run |
+| Powerful tools/secrets | Capability runtime | scoped grants, expiry, audit | no external authority is available |
+| Expensive/long autonomous runs | Budget policy engine | warn thresholds, hard stops, checkpoint | bounded single-turn answer |
+| Auditable artifacts/claims | Provenance graph | claim IDs, source IDs, redaction | output is disposable |
+| Durable branchable sessions | Append-only session log | replay, leaf pointer, compaction entries | no resume/branch/audit needed |
 
 ## Design From Requirements
 
@@ -218,6 +223,11 @@ Base patterns:
 - Guardrail pipeline
 - Run receipt / trace-first runtime
 - Context packing / compression loop
+- Prompt-injection action firewall
+- Capability / least-privilege runtime
+- Runtime budget policy engine
+- Artifact provenance graph
+- Append-only session event log
 
 Required runtime primitives:
 
@@ -226,8 +236,11 @@ Required runtime primitives:
 - status events
 - retry/backoff
 - policy gates
+- scoped capabilities
+- budget thresholds
 - audit trail
 - trace redaction
+- provenance links
 - support bundle or replay path
 
 Anti-pattern:
