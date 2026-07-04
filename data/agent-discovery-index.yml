@@ -1,0 +1,390 @@
+status_date: "2026-07-04"
+purpose: "Machine-readable decision index for agents designing agentic systems."
+how_to_use:
+  - "Match the desired system goal to a use_case."
+  - "Start with the recommended base_pattern."
+  - "Add required_primitives before adding optional_patterns."
+  - "Check failure_modes and avoid_when before finalizing the architecture."
+  - "Follow docs and data links for diagrams, evidence, and implementation notes."
+
+core_decision_questions:
+  - id: duration
+    question: "Is the system one-shot, multi-step, or long-running?"
+  - id: verifiability
+    question: "Can success be checked objectively?"
+  - id: risk
+    question: "Can actions affect external systems, money, users, files, or public channels?"
+  - id: tool_need
+    question: "Does the task require tools, retrieval, code execution, or remote agents?"
+  - id: coordination
+    question: "Does one agent have enough context, tools, and authority?"
+  - id: durability
+    question: "What state must survive context loss, crash, or handoff?"
+  - id: failure_policy
+    question: "What happens on no progress, budget exhaustion, or tool failure?"
+  - id: audit
+    question: "What trace would a human need to debug or trust the run?"
+
+use_cases:
+  - id: simple_tool_assistant
+    goal: "Answer user requests while calling tools when needed."
+    base_pattern: "ReAct"
+    recommended_stack:
+      - "Intent / Context / Routing Front Door"
+      - "Core ReAct / Tool Loop"
+      - "Tool error recovery"
+      - "Loop Detection Circuit Breaker"
+      - "Token Budget Circuit Breaker"
+      - "Run Receipt / Trace-First Runtime"
+    required_primitives:
+      - tool schemas
+      - observations
+      - stop condition
+      - error-to-observation handling
+      - loop budget
+    optional_patterns:
+      - "Verifier / Goal Loop"
+      - "Guardrail Pipeline"
+      - "MCP Tool/Context Protocol Layer"
+    failure_modes:
+      - infinite tool loop
+      - tool hallucination
+      - weak termination
+      - unsafe tool action
+    avoid_when:
+      - "The work is long-running or needs durable checkpoints."
+      - "The action risk requires human approval before execution."
+    docs:
+      - "../docs/flow-diagrams.md#1-core-react--tool-loop"
+      - "../docs/decision-guide.md#if-the-system-must-use-tools"
+
+  - id: multi_step_task_agent
+    goal: "Complete a larger task through visible, inspectable steps."
+    base_pattern: "Plan-and-Execute"
+    recommended_stack:
+      - "Intent / Context / Routing Front Door"
+      - "Plan-and-Execute Loop"
+      - "Plan mode todo loop"
+      - "Verifier / Goal Loop"
+      - "Run Receipt / Trace-First Runtime"
+    required_primitives:
+      - plan artifact
+      - mutable task state
+      - progress status
+      - replan trigger
+      - done check
+    optional_patterns:
+      - "Task Queue / Resumable Workflow Runtime"
+      - "Agent-as-Judge / Referee Team"
+    failure_modes:
+      - stale plan
+      - fake progress
+      - no-progress loop
+    avoid_when:
+      - "The task is small enough for a one-shot answer."
+      - "The task is pure open-ended research with unknown subquestions."
+    docs:
+      - "../docs/flow-diagrams.md#3-plan-and-execute-loop"
+      - "../docs/decision-guide.md#if-the-system-must-finish-multi-step-work"
+
+  - id: correctness_critical_agent
+    goal: "Optimize for correct completion rather than speed."
+    base_pattern: "Verifier / Goal Loop"
+    recommended_stack:
+      - "Verifier / Goal Loop"
+      - "Agent-as-Judge / Referee Team"
+      - "Typed blocker states"
+      - "Bounded retry"
+      - "Run Receipt / Trace-First Runtime"
+    required_primitives:
+      - explicit goal
+      - acceptance criteria
+      - verifier or tests
+      - retry budget
+      - blocked state
+    optional_patterns:
+      - "Multi-Agent Debate / Committee Deliberation"
+      - "Evaluator / Optimizer Loop"
+    failure_modes:
+      - self-certifying success
+      - verifier blind spot
+      - endless revision
+    avoid_when:
+      - "There is no meaningful acceptance criterion."
+      - "Latency matters more than quality."
+    docs:
+      - "../docs/flow-diagrams.md#4-verifier--goal-loop"
+      - "../docs/decision-guide.md#if-correctness-matters-more-than-speed"
+
+  - id: research_agent
+    goal: "Produce source-grounded answers from external or changing information."
+    base_pattern: "Research Loop"
+    recommended_stack:
+      - "Research Loop"
+      - "Source ledger"
+      - "Context Packing / Compression Loop"
+      - "Gap analysis"
+      - "Citation verifier"
+    required_primitives:
+      - query planner
+      - source extraction
+      - source ledger
+      - synthesis step
+      - gap analysis
+    optional_patterns:
+      - "Self-RAG"
+      - "Corrective RAG"
+      - "Agent-as-Judge / Referee Team"
+    failure_modes:
+      - source laundering
+      - stale facts
+      - over-searching
+      - citation mismatch
+    avoid_when:
+      - "The answer is fully known from local context."
+      - "No reliable source access exists."
+    docs:
+      - "../docs/flow-diagrams.md#7-research-loop"
+      - "../docs/decision-guide.md#if-the-system-researches-or-answers-with-facts"
+
+  - id: coding_agent
+    goal: "Modify code safely and verify the change."
+    base_pattern: "Coding Harness Loop"
+    recommended_stack:
+      - "Repo inspection"
+      - "Plan / todos"
+      - "Read-Before-Write File Gate"
+      - "Coding Harness Loop"
+      - "Tests or checks"
+      - "Reviewer / verifier"
+    required_primitives:
+      - repository inspection
+      - edit discipline
+      - tests or checks
+      - reviewer
+      - failure report
+    optional_patterns:
+      - "SWE-agent / Agent-Computer Interface"
+      - "Ralph / Bounded Retry Loop"
+      - "Implement / Review / Merge"
+    failure_modes:
+      - unverified edits
+      - unrelated refactor
+      - stale file writes
+      - weak tests
+    avoid_when:
+      - "The task only asks for explanation."
+      - "No safe edit or verification boundary exists."
+    docs:
+      - "../docs/flow-diagrams.md#19-coding-harness-loop"
+      - "../docs/decision-guide.md#if-the-system-edits-code"
+
+  - id: multi_agent_system
+    goal: "Coordinate multiple agents with different roles, tools, context, or authority."
+    base_pattern: "Supervisor or Swarm"
+    recommended_stack:
+      - "Intent router"
+      - "Supervisor Architecture or Swarm Architecture"
+      - "Typed result schemas"
+      - "Delegation ledger"
+      - "No-progress breaker"
+      - "Run receipt"
+    required_primitives:
+      - role registry
+      - delegation or handoff contract
+      - max turns or depth
+      - result schema
+      - trace of ownership
+    optional_patterns:
+      - "Hierarchical Supervisor Tree"
+      - "Blackboard / Shared Workspace Coordination"
+      - "A2A / Agent Interoperability Protocol Layer"
+    failure_modes:
+      - delegation loops
+      - handoff drift
+      - coordination overhead
+      - translation loss
+    avoid_when:
+      - "One agent with the right tools can do the task."
+      - "There is no clear role separation."
+    docs:
+      - "../docs/supervisor-swarm-techniques.md"
+      - "../docs/flow-diagrams.md#23-supervisor-architecture"
+      - "../docs/flow-diagrams.md#24-swarm-architecture"
+
+  - id: durable_background_agent
+    goal: "Run work that can sleep, wait, retry, checkpoint, or outlive a chat turn."
+    base_pattern: "Task Queue / Resumable Workflow Runtime"
+    recommended_stack:
+      - "Task queue"
+      - "Worker lease"
+      - "Checkpoint / status"
+      - "Retry / backoff"
+      - "Heartbeat or cron trigger"
+      - "Run receipt"
+    required_primitives:
+      - task ID
+      - queue
+      - checkpoint
+      - status contract
+      - retry policy
+      - artifact store
+    optional_patterns:
+      - "HITL Interrupt / Approval Gate"
+      - "Guardrail Pipeline"
+      - "Context Packing / Compression Loop"
+    failure_modes:
+      - lost progress
+      - duplicate side effects
+      - stale checkpoint
+      - silent failure
+    avoid_when:
+      - "The task must return synchronously and has no durable state."
+    docs:
+      - "../docs/flow-diagrams.md#33-task-queue--resumable-workflow-runtime"
+      - "../docs/openclaw-hermes-techniques.md"
+
+  - id: risky_action_agent
+    goal: "Take actions that can affect external systems, users, money, files, or public channels."
+    base_pattern: "HITL Interrupt / Approval Gate"
+    recommended_stack:
+      - "Risk classifier"
+      - "Guardrail Pipeline"
+      - "HITL Interrupt / Approval Gate"
+      - "Audit trail"
+      - "Resume semantics"
+    required_primitives:
+      - risk policy
+      - pending action record
+      - human approval branch
+      - reject/edit branch
+      - audit event
+    optional_patterns:
+      - "Run Receipt / Trace-First Runtime"
+      - "Task Queue / Resumable Workflow Runtime"
+    failure_modes:
+      - accidental external action
+      - approval fatigue
+      - incomplete resume state
+    avoid_when:
+      - "The action is harmless, reversible, and local."
+    docs:
+      - "../docs/flow-diagrams.md#31-hitl-interrupt--approval-gate"
+      - "../docs/decision-guide.md#if-the-system-runs-in-production"
+
+  - id: interoperable_agent_platform
+    goal: "Expose or consume tools, context, or remote agents across process/framework boundaries."
+    base_pattern: "MCP and/or A2A Protocol Layer"
+    recommended_stack:
+      - "Capability discovery"
+      - "MCP Tool/Context Protocol Layer"
+      - "A2A Agent Interoperability Protocol Layer"
+      - "Auth and policy"
+      - "Tracing"
+    required_primitives:
+      - capability manifest
+      - schema validation
+      - authentication
+      - status or result contract
+      - trace events
+    optional_patterns:
+      - "Supervisor Architecture"
+      - "Task Queue / Resumable Workflow Runtime"
+      - "Guardrail Pipeline"
+    failure_modes:
+      - overexposed tools
+      - untrusted remote agents
+      - schema drift
+      - opaque failures
+    avoid_when:
+      - "All tools and agents are local and fixed."
+    docs:
+      - "../docs/additional-runtime-patterns.md#4-a2a--agent-interoperability-protocol-layer"
+      - "../docs/additional-runtime-patterns.md#5-mcp-toolcontext-protocol-layer"
+
+composition_recipes:
+  reliable_tool_assistant:
+    stack:
+      - "Intent router"
+      - "ReAct tool loop"
+      - "Tool error recovery"
+      - "Loop/token breaker"
+      - "Verifier"
+      - "Trace receipt"
+  deep_research_agent:
+    stack:
+      - "Research loop"
+      - "Source ledger"
+      - "Context packing"
+      - "Gap analysis"
+      - "Citation verifier"
+      - "Final synthesis"
+  coding_agent:
+    stack:
+      - "Repo inspection"
+      - "Plan/todos"
+      - "Edit loop"
+      - "Tests"
+      - "Reviewer/verifier"
+      - "Commit or handoff"
+  multi_agent_operations_system:
+    stack:
+      - "Intent router"
+      - "Supervisor or swarm"
+      - "Worker agents"
+      - "Typed results"
+      - "Verifier"
+      - "Run receipt"
+  durable_background_agent:
+    stack:
+      - "Task queue"
+      - "Worker lease"
+      - "Checkpoint/status"
+      - "HITL interrupt if risky"
+      - "Retry/resume"
+      - "Final artifact"
+
+failure_mode_map:
+  infinite_tool_loop:
+    add:
+      - "Loop Detection Circuit Breaker"
+      - "Token Budget Circuit Breaker"
+      - "Ralph / Bounded Retry Loop"
+  fake_completion:
+    add:
+      - "Verifier / Goal Loop"
+      - "Tests"
+      - "Typed blocker states"
+  stale_plan:
+    add:
+      - "Mutable plan state"
+      - "Replan trigger"
+  bad_retrieval:
+    add:
+      - "Self-RAG"
+      - "Corrective RAG"
+      - "Source quality scoring"
+  context_overflow:
+    add:
+      - "Context Packing / Compression Loop"
+      - "Summarization"
+      - "Provenance"
+  unsafe_tool_action:
+    add:
+      - "HITL Interrupt / Approval Gate"
+      - "Guardrail Pipeline"
+  multi_agent_drift:
+    add:
+      - "Delegation ledger"
+      - "Max handoffs"
+      - "Result schemas"
+  hidden_production_failure:
+    add:
+      - "Run Receipt / Trace-First Runtime"
+      - "Status events"
+      - "Support bundle"
+  crash_or_long_wait:
+    add:
+      - "Task Queue / Resumable Workflow Runtime"
+      - "Checkpoint"
+      - "Retry/backoff"

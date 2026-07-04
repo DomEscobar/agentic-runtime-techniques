@@ -9,8 +9,17 @@ loop, a planner/executor harness, a long-running heartbeat, a task queue, or a
 durable runtime with typed state. Those are related ideas, but they solve
 different problems.
 
-The goal is to collect the techniques, name them clearly, compare their trade
-offs, and link to papers, repos, posts, and production implementations.
+The goal is to help agents and builders choose runtime designs. The repo should
+answer:
+
+- What kind of agentic system am I building?
+- Which runtime pattern should I start from?
+- Which supporting primitives do I need?
+- What failure modes should I guard against?
+- What evidence or benchmark signal exists?
+
+The repo collects the techniques, names them clearly, compares their tradeoffs,
+links to evidence, and provides machine-readable discovery data.
 
 ## Scope
 
@@ -35,6 +44,7 @@ Not included by default:
 
 ## Start Here
 
+- [Decision guide](docs/decision-guide.md)
 - [Taxonomy](docs/taxonomy.md)
 - [ASCII flow diagrams](docs/flow-diagrams.md)
 - [Benchmark/date tier list](docs/tier-list.md)
@@ -43,7 +53,29 @@ Not included by default:
 - [Supervisor and swarm technique notes](docs/supervisor-swarm-techniques.md)
 - [Additional runtime patterns](docs/additional-runtime-patterns.md)
 - [Machine-readable catalog](data/techniques.yml)
+- [Agent discovery index](data/agent-discovery-index.yml)
 - [Contribution guide](CONTRIBUTING.md)
+
+## How An Agent Should Use This Repo
+
+1. Start with [Decision guide](docs/decision-guide.md) and identify the
+   system goal: answer questions, use tools, research, code, delegate, run
+   in the background, or govern risky actions.
+2. Select a base control loop from [Taxonomy](docs/taxonomy.md).
+3. Add required runtime primitives from the decision guide: state, verifier,
+   checkpoints, approval gates, guardrails, traces, task queues, or handoffs.
+4. Inspect [ASCII flow diagrams](docs/flow-diagrams.md) to understand branches,
+   retries, stop conditions, and human-in-the-loop points.
+5. Use [Benchmark/date tier list](docs/tier-list.md) to understand evidence
+   strength before claiming a pattern is proven.
+6. Read the implementation notes for production examples:
+   [OpenClaw/Hermes](docs/openclaw-hermes-techniques.md),
+   [DeerFlow](docs/deer-flow-techniques.md),
+   [Supervisor/Swarm](docs/supervisor-swarm-techniques.md), and
+   [Additional runtime patterns](docs/additional-runtime-patterns.md).
+
+For automated consumption, use `data/agent-discovery-index.yml` first, then
+follow its links into `data/techniques.yml` and the docs.
 
 ## Initial Categories
 
