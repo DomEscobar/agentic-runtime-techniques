@@ -56,6 +56,7 @@ Not included by default:
 - [Additional runtime patterns](docs/additional-runtime-patterns.md)
 - [Machine-readable catalog](data/techniques.yml)
 - [Agent discovery index](data/agent-discovery-index.yml)
+- [Runtime analyses](analysis/)
 - [Contribution guide](CONTRIBUTING.md)
 
 ## How An Agent Should Use This Repo
