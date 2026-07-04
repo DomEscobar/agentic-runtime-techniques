@@ -1,0 +1,70 @@
+status_date: "2026-07-04"
+sources:
+  - https://github.com/openai/swarm
+  - https://github.com/langchain-ai/langgraph-swarm-py
+  - https://reference.langchain.com/python/langgraph-supervisor
+  - https://www.langchain.com/blog/benchmarking-multi-agent-architectures
+  - https://docs.crewai.com/v1.15.0/en/concepts/processes
+techniques:
+  - name: Supervisor Architecture
+    category: multi_agent_supervisor
+    summary: "A central supervisor receives user input, delegates to worker agents, receives worker results, and produces or forwards the user-facing response."
+    loop_shape: "user -> supervisor -> worker -> supervisor -> user"
+    runtime_primitives:
+      - supervisor agent
+      - worker registry
+      - delegation or handoff tools
+      - result return channel
+      - optional forward_message tool
+      - delegation ledger
+      - continuation limits
+    strengths:
+      - generic across third-party or black-box workers
+      - easier central governance and audit
+      - clear owner for final response
+    risks:
+      - translation loss
+      - coordinator bottleneck
+      - higher token cost
+      - delegation loops
+    tier: "B/A boundary"
+  - name: Swarm Architecture
+    category: multi_agent_swarm
+    summary: "Agents dynamically hand off control to one another based on specialization; the active agent can often respond directly."
+    loop_shape: "user -> active_agent -> handoff -> next_active_agent -> user"
+    runtime_primitives:
+      - active agent state
+      - handoff tools
+      - context variables
+      - last-active-agent memory
+      - max turns
+      - optional checkpointer or store
+    strengths:
+      - lower translation overhead
+      - lightweight specialist handoffs
+      - direct response by active specialist
+    risks:
+      - weaker global coordination
+      - handoff drift
+      - peer-awareness requirement
+      - handoff loops
+    tier: "B/A boundary"
+  - name: Hierarchical Supervisor Tree
+    category: hierarchical_multi_agent
+    summary: "A root supervisor delegates to domain supervisors, which delegate to specialized workers."
+    loop_shape: "user -> root_supervisor -> domain_supervisor -> worker -> domain_supervisor -> root_supervisor -> user"
+    runtime_primitives:
+      - root supervisor
+      - domain supervisors
+      - worker agents
+      - result contracts
+      - delegation limits
+      - no-progress breakers
+    strengths:
+      - scales ownership across domains
+      - separates planning levels
+    risks:
+      - high coordination cost
+      - more translation layers
+      - harder debugging
+    tier: "B"

@@ -130,6 +130,15 @@ tiers:
         benchmark_signal: "Explicit durable execution, persistence, streaming, human-in-the-loop features."
         sources:
           - https://docs.langchain.com/oss/python/langgraph/overview
+      - name: Swarm / Supervisor multi-agent architectures
+        published: "2024-10 / 2025-06"
+        area: multi_agent_orchestration
+        benchmark_signal: "OpenAI Swarm and LangGraph packages provide implementation evidence; LangChain benchmark compares single-agent, swarm, and supervisor on modified Tau-bench."
+        sources:
+          - https://github.com/openai/swarm
+          - https://github.com/langchain-ai/langgraph-swarm-py
+          - https://reference.langchain.com/python/langgraph-supervisor
+          - https://www.langchain.com/blog/benchmarking-multi-agent-architectures
   C:
     meaning: "Emerging or useful but currently weak public benchmark evidence."
     techniques:

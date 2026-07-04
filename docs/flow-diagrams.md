@@ -889,3 +889,127 @@ Branch notes:
 
 - The runtime treats agent failure as code-level error semantics.
 - `sleep` + `checkpoint` turns a program into a durable agent loop.
+
+## 23. Supervisor Architecture
+
+```text
+User request
+    |
+    v
++------------------------+
+| Supervisor agent       |
+| route / delegate       |
++------------------------+
+    |
+    +------------+------------+
+    |            |            |
+    v            v            v
++---------+  +---------+  +---------+
+|Agent A  |  |Agent B  |  |Agent C  |
++---------+  +---------+  +---------+
+    |            |            |
+    +------------+------------+
+                 |
+                 v
+        +------------------------+
+        | Back to supervisor     |
+        | synthesize / forward   |
+        +------------------------+
+                 |
+                 v
+        +------------------------+
+        | More delegation?       |
+        +------------------------+
+             | yes       no
+             v          v
+        Supervisor   User response
+```
+
+Branch notes:
+
+- Only the supervisor talks to the user in the strict form.
+- Subagents can be treated as black boxes, which makes this generic.
+- The main risk is the "telephone" problem: supervisor paraphrases or distorts
+  subagent outputs.
+- Strong versions add `forward_message`, handoff-message trimming, typed
+  blockers, and delegation ledgers.
+
+## 24. Swarm Architecture
+
+```text
+User request
+    |
+    v
++------------------------+
+| Active agent           |
++------------------------+
+    |
+    v
++------------------------+
+| Can handle?            |
++------------------------+
+    | yes                         no / better specialist
+    v                             v
++------------------------+   +------------------------+
+| Respond / act          |   | Handoff tool           |
++------------------------+   | transfer to agent X    |
+    |                       +------------------------+
+    v                             |
++------------------------+        v
+| Done?                  |   +------------------------+
++------------------------+   | New active agent       |
+    | yes       no          +------------------------+
+    v          v                    |
+  User     Active agent <-----------+
+ response
+```
+
+Branch notes:
+
+- Agents hand off directly to one another.
+- One agent is active at a time in the common LangGraph/OpenAI Swarm shape.
+- The system should remember the last active agent for later turns.
+- The main risk is loss of global coordination: no central supervisor owns the
+  whole plan unless you add one.
+
+## 25. Hierarchical Supervisor Tree
+
+```text
+User request
+    |
+    v
++--------------------------+
+| Root supervisor          |
++--------------------------+
+    |
+    +------------------+------------------+
+    |                                     |
+    v                                     v
++--------------------------+      +--------------------------+
+| Domain supervisor A      |      | Domain supervisor B      |
++--------------------------+      +--------------------------+
+    |                                     |
+    +-----------+-----------+             +-----------+-----------+
+    |           |           |             |           |           |
+    v           v           v             v           v           v
+ Agent A1    Agent A2    Agent A3      Agent B1    Agent B2    Agent B3
+    |           |           |             |           |           |
+    +-----------+-----------+             +-----------+-----------+
+                |                                     |
+                v                                     v
+        Domain supervisor A                  Domain supervisor B
+                |                                     |
+                +------------------+------------------+
+                                   |
+                                   v
+                           Root supervisor
+                                   |
+                                   v
+                            User response
+```
+
+Branch notes:
+
+- Useful when domains are too large for one supervisor.
+- Adds coordination cost and more places for information loss.
+- Needs explicit ownership, delegation limits, and result contracts.
