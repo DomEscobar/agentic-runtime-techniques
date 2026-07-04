@@ -211,3 +211,54 @@ tiers:
         sources:
           - https://www.anthropic.com/news/claude-opus-4-8
         notes: "Cataloged in data/techniques.yml as 'Dynamic Workflow Generation'."
+      - name: Infinite Agentic Loop Static Analysis
+        published: "2026-07"
+        area: bounded_retry_loop
+        benchmark_signal: "IAL-Scan reports 68 confirmed failures across 47 projects at 91.9% precision; single fresh preprint, not yet independently replicated."
+        sources:
+          - https://arxiv.org/abs/2607.01641
+      - name: Self-Healing Orchestrator
+        published: "2026-06"
+        area: tool_runtime
+        benchmark_signal: "98.8% task success on controlled fault injection versus retry-only and full-replanning baselines; single fresh preprint."
+        sources:
+          - https://arxiv.org/abs/2606.01416
+      - name: Workflow Portfolio Router
+        published: "2026-06"
+        area: harness_runtime
+        benchmark_signal: "FlowBank reports gains from precompute-and-reuse workflow routing over per-query workflow construction; single fresh preprint."
+        sources:
+          - https://arxiv.org/abs/2606.11290
+      - name: Meta-Tool Compiler
+        published: "2026-01"
+        area: tool_runtime
+        benchmark_signal: "Reports reduced LLM calls and improved success rate from compiling mined trace repetition into composite tools; single fresh preprint."
+        sources:
+          - https://arxiv.org/abs/2601.22037
+      - name: Cost-Aware Agentic Query Optimizer
+        published: "2026-06"
+        area: cost_runtime
+        benchmark_signal: "Formalizes agentic query execution as cost-aware operator placement; single fresh preprint, evaluation still early."
+        sources:
+          - https://arxiv.org/abs/2606.03152
+      - name: Trajectory-Level Reward / Verifier
+        published: "2026-04"
+        area: test_time_compute
+        benchmark_signal: "Plan-RewardBench shows all tested evaluator families degrade on long-horizon tool-integrated trajectories; benchmark paper, not yet a widely adopted runtime technique."
+        sources:
+          - https://arxiv.org/abs/2604.08178
+      - name: Memory Write-Manage-Read Loop
+        published: "2026-01"
+        area: memory_runtime
+        benchmark_signal: "SimpleMem reports large token reductions from structured compression, synthesis, and intent-aware retrieval; single fresh preprint."
+        sources:
+          - https://arxiv.org/abs/2601.02553
+      - name: Agent-Aware Serving Policy Layer
+        published: "2026-05 / 2026-03 / 2026-05"
+        area: cost_runtime
+        benchmark_signal: "Three independent 2026 preprints (policy-driven runtime layer validated with CacheSage, Helium, HexAGenT) converge on agent-aware serving/scheduling; all fresh, none independently replicated."
+        sources:
+          - https://arxiv.org/abs/2605.27744
+          - https://arxiv.org/abs/2603.16104
+          - https://arxiv.org/abs/2605.16637
+        notes: "Merges three papers cataloged as a single entry, 'Agent-Aware Serving Policy Layer', in data/techniques.yml."

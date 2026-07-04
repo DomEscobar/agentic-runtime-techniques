@@ -84,6 +84,14 @@ technique always beats another.
 | varies | Tool reliability scoring and fallback | Tool runtime | Useful but still emerging as a named pattern; evidence mostly comes from implementation diagnostics and tool contract systems. | [OpenClaw notes](openclaw-hermes-techniques.md) |
 | varies | Artifact provenance graph | Provenance / audit | Strong auditability value, especially for research and generated artifacts; implementation standards are still evolving. | [OpenTelemetry GenAI](https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-agent-spans/) |
 | varies | Append-only session event log / branchable replay | Durable session runtime | Strong implementation evidence from Tau; makes resume, branching, compaction, and audit replay explicit. | [Tau session primitives](https://github.com/huggingface/tau/tree/main/src/tau_agent/session) |
+| 2026-07 | Infinite Agentic Loop Static Analysis | Bounded retry loop | IAL-Scan reports 68 confirmed failures across 47 projects at 91.9% precision; single fresh preprint, not yet independently replicated. | [arXiv](https://arxiv.org/abs/2607.01641) |
+| 2026-06 | Self-Healing Orchestrator | Tool runtime | 98.8% task success on controlled fault injection versus retry-only and full-replanning baselines; single fresh preprint. | [arXiv](https://arxiv.org/abs/2606.01416) |
+| 2026-06 | Workflow Portfolio Router | Harness runtime | FlowBank reports gains from precompute-and-reuse workflow routing over per-query construction; single fresh preprint. | [arXiv](https://arxiv.org/abs/2606.11290) |
+| 2026-01 | Meta-Tool Compiler | Tool runtime | Reports reduced LLM calls and improved success rate from compiling mined trace repetition into composite tools; single fresh preprint. | [arXiv](https://arxiv.org/abs/2601.22037) |
+| 2026-06 | Cost-Aware Agentic Query Optimizer | Cost runtime | Formalizes agentic query execution as cost-aware operator placement; single fresh preprint, evaluation still early. | [arXiv](https://arxiv.org/abs/2606.03152) |
+| 2026-04 | Trajectory-Level Reward / Verifier | Test-time compute | Plan-RewardBench shows all tested evaluator families degrade on long-horizon tool-integrated trajectories; benchmark paper, not yet a widely adopted runtime technique. | [arXiv](https://arxiv.org/abs/2604.08178) |
+| 2026-01 | Memory Write-Manage-Read Loop | Memory runtime | SimpleMem reports large token reductions from structured compression, synthesis, and intent-aware retrieval; single fresh preprint. | [arXiv](https://arxiv.org/abs/2601.02553) |
+| 2026-05 / 2026-03 / 2026-05 | Agent-Aware Serving Policy Layer | Cost runtime | Three independent 2026 preprints (policy-driven runtime layer validated with CacheSage, Helium, HexAGenT) converge on agent-aware serving/scheduling; all fresh, none independently replicated. | [Policy layer](https://arxiv.org/abs/2605.27744), [Helium](https://arxiv.org/abs/2603.16104), [HexAGenT](https://arxiv.org/abs/2605.16637) |
 
 ## Cross-Cutting Techniques: Resolved
 
@@ -103,14 +111,31 @@ Techniques added in this patch that still need stronger source work before a
 formal tier assignment, because no single canonical primary source was
 found:
 
-- Episodic vector-store memory retrieval loop
 - Semantic / prompt caching layer
-- Saga / compensating transaction loop
 - Idempotency key runtime
 - Offline regression eval loop
 - Parallel tool-call fan-out / join
 - Contract-net / auction-based delegation
 - Intent / context / routing front door
+
+## Resolved by the 2026 arXiv Sweep
+
+A follow-up DeepResearch pass over 2026 arXiv preprints
+(`analysis/2026-arxiv-agentic-runtime-techniques.md`) closed two of the gaps
+above and added eight new entries. Resolved:
+
+- Saga / compensating transaction loop: backfilled with Mnemosyne's Agentic
+  Transaction Processing paper.
+- Episodic vector-store memory retrieval loop: backfilled with a 2026 memory
+  survey as secondary evidence, and paired with a new, more complete sibling
+  entry, Memory Write-Manage-Read Loop.
+
+All eight new entries from that sweep are single fresh 2026 preprints with
+unreplicated numbers, so they are capped at C tier until independently
+replicated: Infinite Agentic Loop Static Analysis, Self-Healing Orchestrator,
+Workflow Portfolio Router, Meta-Tool Compiler, Cost-Aware Agentic Query
+Optimizer, Trajectory-Level Reward / Verifier, Memory Write-Manage-Read Loop,
+and Agent-Aware Serving Policy Layer.
 
 ## Read This Carefully
 

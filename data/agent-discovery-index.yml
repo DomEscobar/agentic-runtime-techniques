@@ -333,6 +333,8 @@ use_cases:
     optional_patterns:
       - "Self-Consistency / Sample-and-Vote"
       - "Token Budget Circuit Breaker"
+      - "Cost-Aware Agentic Query Optimizer"
+      - "Agent-Aware Serving Policy Layer"
     failure_modes:
       - cost spike
       - misrouted hard query to weak model
@@ -408,6 +410,7 @@ use_cases:
       - eviction or curation policy
     optional_patterns:
       - "Context Trust Zones"
+      - "Memory Write-Manage-Read Loop"
     failure_modes:
       - stale or wrong memory retrieved
       - memory/skill library bloat
@@ -532,6 +535,8 @@ failure_mode_map:
       - "Model Cascading / Tiered Routing"
       - "Semantic / Prompt Caching Layer"
       - "Runtime Budget Policy Engine"
+      - "Cost-Aware Agentic Query Optimizer"
+      - "Agent-Aware Serving Policy Layer"
   duplicate_side_effects:
     add:
       - "Idempotency Key Runtime"
@@ -545,3 +550,19 @@ failure_mode_map:
     add:
       - "Offline Regression Eval Loop"
       - "Adversarial Red-Team / Injection-Regression Loop"
+  unbounded_feedback_path:
+    add:
+      - "Infinite Agentic Loop Static Analysis"
+      - "Loop Detection Circuit Breaker"
+  tool_failure_needs_typed_recovery:
+    add:
+      - "Self-Healing Orchestrator"
+      - "Tool Reliability Scoring and Fallback"
+  trajectory_fails_end_to_end:
+    add:
+      - "Trajectory-Level Reward / Verifier"
+  repeated_workflow_re_reasoned:
+    add:
+      - "Workflow Portfolio Router"
+      - "Meta-Tool Compiler"
+      - "Skill Library / Lifelong Skill-Acquisition Loop"

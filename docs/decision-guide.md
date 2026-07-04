@@ -29,7 +29,7 @@ reliable for its job.
 | Expensive/long autonomous runs | Budget policy engine | warn thresholds, hard stops, checkpoint | bounded single-turn answer |
 | Auditable artifacts/claims | Provenance graph | claim IDs, source IDs, redaction | output is disposable |
 | Durable branchable sessions | Append-only session log | replay, leaf pointer, compaction entries | no resume/branch/audit needed |
-| Cost-sensitive, high-volume traffic | Model cascading / tiered routing | semantic/prompt caching, cost accounting | traffic is low-volume or every call needs the strongest model |
+| Cost-sensitive, high-volume traffic | Model cascading / tiered routing | semantic/prompt caching, cost-aware query optimizer, agent-aware serving policy layer | traffic is low-volume or every call needs the strongest model |
 | Irreversible multi-API side effects | Saga / compensating transaction loop | idempotency keys, step log, reverse-order compensation | side effects are read-only or trivially retryable |
 | Hard reasoning task, correctness-critical | Test-time compute (self-consistency / tree search / PRM search) | sample budget, verifier, backoff to cheaper decoding on easy inputs | task is easy enough for single-pass reasoning |
 | Cross-session learning or personalization | Memory runtime (MemGPT paging / episodic retrieval / skill library) | eviction policy, retrieval cap, skill curation | agent is stateless by design or sessions never repeat |
@@ -361,6 +361,10 @@ Before choosing a pattern, answer these:
 | Duplicate side effects from retries or crash recovery | idempotency keys, saga compensation, at-most-once execution wrapper |
 | Wrong answer on hard reasoning despite a plausible-looking chain | self-consistency, tree search with verifier, PRM-guided step search |
 | Regression after a prompt, tool, or model change | offline regression eval loop, adversarial red-team/injection-regression loop |
+| Unbounded feedback path across model calls, tools, or handoffs that a turn counter misses | infinite agentic loop static analysis (build/CI check), loop detection circuit breaker (runtime guard) |
+| Repeated tool failures handled by blind retry instead of a targeted fix | self-healing orchestrator, tool reliability scoring and fallback |
+| Answer looks fine at each step but the full run fails end to end | trajectory-level reward/verifier |
+| Re-deriving the same multi-step workflow or tool sequence on every similar task | workflow portfolio router, meta-tool compiler, skill library |
 
 ## Minimal Viable Runtime
 

@@ -39,6 +39,10 @@ techniques:
       - title: "Plan-and-Execute Agents"
         url: "https://www.langchain.com/blog/planning-agents"
         type: article
+      - title: "GeoAgentBench"
+        url: "https://arxiv.org/abs/2604.13888"
+        type: benchmark
+    notes: "GeoAgentBench's Plan-and-React architecture, evaluated over 117 tools and 53 tasks, is a domain-specific instance of this pattern that separates a stable global plan from step-wise reactive execution and per-step repair, reported to improve robustness on brittle tools."
 
   - name: ReWOO
     category: planning_loop
@@ -176,11 +180,15 @@ techniques:
     tradeoffs:
       - metric design is critical
       - exploration can get narrow
+      - improvements can be seed noise rather than genuine gains unless certified against a noise baseline
     sources:
       - title: "karpathy/autoresearch"
         url: "https://github.com/karpathy/autoresearch"
         type: code
-    notes: "Placeholder source replaced. Karpathy's autoresearch is an autonomous ML experiment loop: an agent reads a human-written program.md, proposes one change to train.py, commits to a git branch, runs a fixed-duration training job, and keeps the commit (git commit) or reverts it (git reset) based on whether the target metric improved."
+      - title: "Agentic AutoResearch for Space Autonomy"
+        url: "https://arxiv.org/abs/2606.20394"
+        type: paper
+    notes: "Placeholder source replaced. Karpathy's autoresearch is an autonomous ML experiment loop: an agent reads a human-written program.md, proposes one change to train.py, commits to a git branch, runs a fixed-duration training job, and keeps the commit (git commit) or reverts it (git reset) based on whether the target metric improved. The 2026 aerospace-control paper is an independent system with the same propose/run/evaluate/keep-revert shape, adding a credibility layer that certifies each reported improvement against the problem's own measured seed noise before it is kept."
 
   - name: Planner / Executor Harness
     category: multi_agent_loop
@@ -401,6 +409,10 @@ techniques:
       - title: "OpenAI Agents SDK Guardrails"
         url: "https://openai.github.io/openai-agents-python/guardrails/"
         type: docs
+      - title: "Governance by Construction for Generalist Agents"
+        url: "https://arxiv.org/abs/2605.20874"
+        type: paper
+    notes: "CUGA's policy-as-code architecture intercepts at five structural checkpoints (upstream of planning, tool calls, and outputs, among others) rather than only as a final moderation pass, reinforcing that guardrail stages should attach to every boundary, not just input/output."
 
   - name: Run Receipt / Trace-First Runtime
     category: observability
@@ -592,6 +604,48 @@ techniques:
         url: "docs/openclaw-hermes-techniques.md"
         type: local
 
+  - name: Self-Healing Orchestrator
+    category: tool_runtime
+    summary: The runtime observes failure signals, classifies the failure type, selects a targeted recovery action under a budget, executes it, and verifies the recovered trajectory before continuing, instead of blindly retrying or fully replanning.
+    loop_shape: observe failure signal -> classify failure type -> select bounded recovery action -> execute recovery -> verify recovered trajectory -> continue or escalate
+    runtime_primitives:
+      - failure signal observer
+      - failure classifier
+      - recovery action catalog
+      - recovery budget
+      - trajectory verifier
+      - observability trace
+    solves:
+      - low reliability from blind retry or full replanning after tool-augmented failures
+    tradeoffs:
+      - failure classifier needs broad coverage of failure classes to route correctly
+      - recovery catalog must be curated per failure class
+    sources:
+      - title: "Self-Healing Agentic Orchestrators for Reliable Tool-Augmented Large Language Model Systems"
+        url: "https://arxiv.org/abs/2606.01416"
+        type: paper
+    notes: "Distinct from Tool Reliability Scoring and Fallback: that technique routes future calls to primary/fallback/quarantine tools based on accumulated history, this technique classifies a specific in-flight failure and selects a targeted, verified recovery action for that trajectory. Reports 98.8% task success on controlled fault injection versus retry-only and full-replanning baselines."
+
+  - name: Meta-Tool Compiler
+    category: tool_runtime
+    summary: The runtime mines historical tool-call traces for repeated action sequences and compiles the recurring sequence into a single deterministic composite tool, so future occurrences of that pattern execute as one call instead of being re-reasoned step by step.
+    loop_shape: collect tool-call traces -> mine repeated action sequences -> compile sequence into deterministic composite tool -> register meta-tool -> future matching tasks call meta-tool directly
+    runtime_primitives:
+      - tool-call trace store
+      - sequence-mining step
+      - composite-tool compiler
+      - meta-tool registry
+    solves:
+      - repeatedly re-reasoning through the same multi-step tool sequence across similar tasks
+    tradeoffs:
+      - compiled sequences are deterministic and can miss task-specific variation the original reasoning would have caught
+      - trace mining needs enough call volume to find genuine repetition
+    sources:
+      - title: "Optimizing Agentic Workflows using Meta-tools"
+        url: "https://arxiv.org/abs/2601.22037"
+        type: paper
+    notes: "Distinct from Skill Library / Lifelong Skill-Acquisition Loop: skills are proposed, verified, and stored as open-ended code or procedures by the agent itself, meta-tools are mechanically compiled from mined trace repetition into deterministic composite tools, reducing LLM calls per occurrence."
+
   - name: Artifact Provenance Graph
     category: provenance
     summary: Store relationships from sources and tool calls to claims, artifacts, transformations, and final answers.
@@ -614,6 +668,10 @@ techniques:
       - title: "OpenTelemetry GenAI semantic conventions"
         url: "https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-agent-spans/"
         type: spec
+      - title: "From Agent Traces to Trust"
+        url: "https://arxiv.org/abs/2606.04990"
+        type: paper
+    notes: "\"From Agent Traces to Trust\" gives this pattern an academic grounding: execution provenance as a typed graph of an agent run, with evidence tracing as the projection onto support relations, connecting retrieval grounding, tool-use safety, memory lineage, debugging, audit, and recovery."
 
   - name: Append-Only Session Event Log / Branchable Replay
     category: durable_session_runtime
@@ -1043,6 +1101,27 @@ techniques:
       - title: "DeerFlow technique notes"
         url: "docs/deer-flow-techniques.md"
         type: local
+    notes: "Distinct from Infinite Agentic Loop Static Analysis: this technique is a live runtime guard that hashes and counts repeated tool calls during a run, that technique is a build/CI-time static analyzer over the whole agent graph before a run starts."
+
+  - name: Infinite Agentic Loop Static Analysis
+    category: bounded_retry_loop
+    summary: A static analyzer builds a framework-independent agent intermediate representation and dependence graph across model calls, tools, workflow transitions, and handoffs, then reports feedback paths that can run without an effective bound before the agent ever executes.
+    loop_shape: build agent IR -> construct loop dependence graph -> detect unbounded feedback paths -> report findings -> developer adds bound
+    runtime_primitives:
+      - framework-independent agent IR
+      - agentic loop dependence graph
+      - static feedback-path detection
+      - confirmed-failure report
+    solves:
+      - unbounded feedback paths across model calls, tools, workflow transitions, and agent handoffs that ad hoc turn counters miss
+    tradeoffs:
+      - adds a static-analysis step to the build or CI pipeline
+      - cannot catch loops whose bound depends on runtime-only data
+    sources:
+      - title: "When Agents Do Not Stop: Uncovering Infinite Agentic Loops in LLM Agents"
+        url: "https://arxiv.org/abs/2607.01641"
+        type: paper
+    notes: "Complements Loop Detection Circuit Breaker: that technique is a live runtime guard, this technique is a build/CI-time static analyzer over the whole agent graph before a run starts. Its IAL-Scan implementation reports 68 confirmed failures across 47 projects at 91.9% precision."
 
   - name: Token Budget Circuit Breaker
     category: budget_enforcement
@@ -1235,6 +1314,25 @@ techniques:
         type: paper
     notes: "Distinct from the Codex Goal / Verifier Loop entry: that loop verifies final outcomes, this technique scores intermediate reasoning steps to guide search."
 
+  - name: Trajectory-Level Reward / Verifier
+    category: test_time_compute
+    summary: A reward or verifier model scores an entire tool-integrated trajectory end to end, rather than only the final answer or only intermediate steps, and the runtime uses that trajectory-level score to select among candidate full runs.
+    loop_shape: run candidate trajectory to completion -> score full trajectory with trajectory-level reward model -> compare across candidate trajectories -> select or discard
+    runtime_primitives:
+      - tool-integrated trajectory
+      - trajectory-level reward model
+      - cross-trajectory comparison
+    solves:
+      - reward models degrading on long-horizon, tool-using trajectories when only trained or evaluated on final answers
+    tradeoffs:
+      - requires running full trajectories to completion before scoring, costlier than step-level scoring
+      - all evaluator families in benchmark testing degrade on long-horizon trajectories
+    sources:
+      - title: "Aligning Agents via Planning: Plan-RewardBench"
+        url: "https://arxiv.org/abs/2604.08178"
+        type: paper
+    notes: "Distinct from Verifier / PRM-Guided Step Search: that technique scores each intermediate reasoning step to guide or prune search mid-generation, this technique scores a completed tool-integrated trajectory as a whole to select among full candidate runs."
+
   - name: MemGPT-Style Memory Paging
     category: memory_runtime
     summary: An OS-inspired virtual context manager pages information between a limited main context window and external archival/recall storage, letting the model manage its own memory through function calls.
@@ -1268,8 +1366,31 @@ techniques:
     tradeoffs:
       - similarity retrieval can miss relevant memories that are not lexically/semantically close
       - stale memories accumulate without an eviction policy
-    sources: []
-    notes: "Widely implemented across memory frameworks; no single canonical primary paper identified yet. Contrast with MemGPT-style paging, which manages a hierarchy of storage tiers rather than a flat similarity index."
+    sources:
+      - title: "Memory for Autonomous LLM Agents"
+        url: "https://arxiv.org/abs/2603.07670"
+        type: paper
+    notes: "Widely implemented across memory frameworks; this survey covers flat similarity retrieval as one point in the broader agent-memory design space rather than being a dedicated primary source for it. Contrast with MemGPT-style paging, which manages a hierarchy of storage tiers rather than a flat similarity index, and with the Memory Write-Manage-Read Loop entry, which treats memory as compression, synthesis, and intent-aware retrieval planning rather than flat top-k similarity."
+
+  - name: Memory Write-Manage-Read Loop
+    category: memory_runtime
+    summary: "Agent memory is treated as an explicit three-phase lifecycle coupled to action: writes go through semantic structured compression, a management phase performs online semantic synthesis over stored memory, and reads use intent-aware retrieval planning instead of a flat top-k similarity lookup."
+    loop_shape: turn produces content -> write via structured compression -> manage via online semantic synthesis -> read via intent-aware retrieval planning -> inject into context
+    runtime_primitives:
+      - semantic structured compression on write
+      - online semantic synthesis during management
+      - intent-aware retrieval planner
+      - memory lifecycle policy
+    solves:
+      - treating memory as raw accumulated context instead of a managed lifecycle, causing token bloat and low-precision recall
+    tradeoffs:
+      - compression and synthesis steps add latency and can lose detail if tuned too aggressively
+      - intent-aware retrieval planning is more complex to implement than similarity search
+    sources:
+      - title: "SimpleMem: Efficient Lifelong Memory for LLM Agents"
+        url: "https://arxiv.org/abs/2601.02553"
+        type: paper
+    notes: "Generalizes the Episodic Vector-Store Memory Retrieval Loop entry's flat similarity read into a full write/manage/read lifecycle with compression and synthesis; SimpleMem reports large token reductions from this approach. Distinct from MemGPT-style paging, which manages storage-tier placement rather than compression and retrieval-intent planning."
 
   - name: Skill Library / Lifelong Skill-Acquisition Loop
     category: reflection_loop
@@ -1293,7 +1414,10 @@ techniques:
       - title: "Voyager project"
         url: "https://voyager.minedojo.org/"
         type: article
-    notes: "Generalizes Voyager's skill library beyond Minecraft. OpenClaw's Skill Workshop and DeerFlow's skill activation (docs/openclaw-hermes-techniques.md, docs/deer-flow-techniques.md) are production instances of the same pattern without a formal public benchmark."
+      - title: "A Comprehensive Survey on Agent Skills: Taxonomy, Techniques, and Applications"
+        url: "https://arxiv.org/abs/2605.07358"
+        type: paper
+    notes: "Generalizes Voyager's skill library beyond Minecraft. OpenClaw's Skill Workshop and DeerFlow's skill activation (docs/openclaw-hermes-techniques.md, docs/deer-flow-techniques.md) are production instances of the same pattern without a formal public benchmark. The 2026 survey frames skills as reusable procedural runtime artifacts, not prompt snippets, motivated by the cost of from-scratch reasoning and low-level tool calls on every task."
 
   - name: Model Cascading / Tiered Routing
     category: cost_runtime
@@ -1332,6 +1456,52 @@ techniques:
     sources: []
     notes: "Provider-specific prefix-caching docs exist per vendor; no single canonical cross-provider primary source identified yet. Related to the prefix-cache-friendly dynamic context pattern in docs/deer-flow-techniques.md."
 
+  - name: Cost-Aware Agentic Query Optimizer
+    category: cost_runtime
+    summary: Agentic query execution is treated like database query optimization, where operator placement, selectivity scope, and projection width are explicit knobs the runtime tunes against a combined quality-and-cost objective as planning interleaves with execution.
+    loop_shape: agentic query plan -> place operators (model call vs. deterministic op) -> execute with current placement -> measure quality/cost feedback -> re-tune placement -> continue
+    runtime_primitives:
+      - operator placement decision
+      - selectivity/projection scope
+      - quality-cost feedback signal
+      - interleaved plan/execute step
+    solves:
+      - agentic pipelines that default every operation to an LLM call regardless of cost
+    tradeoffs:
+      - requires a measurable quality signal to trade off against cost
+      - optimizer overhead only pays off on workloads with enough query volume
+    sources:
+      - title: "Cost-Aware Optimization for Agentic Query Execution"
+        url: "https://arxiv.org/abs/2606.03152"
+        type: paper
+    notes: "Complements Model Cascading / Tiered Routing: cascading routes a whole query to a cheaper or stronger model, this technique optimizes the placement and granularity of individual operators inside one agentic query plan."
+
+  - name: Agent-Aware Serving Policy Layer
+    category: cost_runtime
+    summary: A middle runtime layer sits between the agent orchestration framework and the model-serving engine, using observe/score/predict/act primitives so that caching, batching, fairness, tool-result memoization, and speculative execution decisions have access to agent identity and workflow structure instead of treating each request in isolation.
+    loop_shape: agent/workflow event -> observe engine and agent state -> score/predict policy decision -> act (cache/batch/route/throttle) -> serving engine -> feedback
+    runtime_primitives:
+      - agent identity propagated into serving layer
+      - observe/score/predict/act policy primitives
+      - workflow-aware scheduling
+      - cross-call cache/memoization store
+    solves:
+      - per-request serving optimizations missing cross-call and cross-workflow redundancy that only agent-aware scheduling can see
+    tradeoffs:
+      - requires the serving engine to expose enough hooks for agent-identity-aware policy
+      - adds a new middleware layer to operate and debug
+    sources:
+      - title: "A Policy-Driven Runtime Layer for Agentic LLM Serving"
+        url: "https://arxiv.org/abs/2605.27744"
+        type: paper
+      - title: "Efficient LLM Serving for Agentic Workflows"
+        url: "https://arxiv.org/abs/2603.16104"
+        type: paper
+      - title: "HexAGenT"
+        url: "https://arxiv.org/abs/2605.16637"
+        type: paper
+    notes: "Merges three 2026 papers converging on the same claim from different angles: agent serving needs workflow/agent-aware scheduling, not just per-request handling. A Policy-Driven Runtime Layer contributes the observe/score/predict/act primitives, validated with CacheSage; Efficient LLM Serving for Agentic Workflows (nicknamed Helium) and HexAGenT independently argue that agent applications experience workflow-level latency and cross-call redundancy that isolated per-call scheduling cannot see. Distinct from Model Cascading, which routes a whole query between models, and generalizes Semantic / Prompt Caching Layer, one mechanism this layer folds into a broader policy tier alongside batching, fairness, and speculative execution."
+
   - name: Saga / Compensating Transaction Loop
     category: transactional_runtime
     summary: A multi-step task that calls several external, stateful APIs records a compensating action for each completed step, so a failure partway through triggers reverse-order compensation instead of leaving partial side effects.
@@ -1345,8 +1515,11 @@ techniques:
       - partial side effects from multi-API agent workflows that fail midway
     tradeoffs:
       - every side-effecting step needs a defined compensating action, which is not always possible
-    sources: []
-    notes: "Classical distributed-systems pattern (saga), applied to agent tool orchestration; no single canonical agent-runtime primary source identified yet."
+    sources:
+      - title: "Mnemosyne: Agentic Transaction Processing for Validating and Repairing AI-generated Workflows"
+        url: "https://arxiv.org/abs/2607.00269"
+        type: paper
+    notes: "Classical distributed-systems pattern (saga), applied to agent tool orchestration. Mnemosyne's Agentic Transaction Processing formalizes this as proposal -> admission -> commit -> repair: agent-generated workflow actions are untrusted proposals until admitted under executable constraints, backed by an append-only transition log, effective-state projection, and dependency-safe compensation."
 
   - name: Idempotency Key Runtime
     category: transactional_runtime
@@ -1456,6 +1629,25 @@ techniques:
         url: "https://www.anthropic.com/news/claude-opus-4-8"
         type: article
     notes: "Emerging direction as of 2026; evidence is mostly product/demo-level so far."
+
+  - name: Workflow Portfolio Router
+    category: harness_runtime
+    summary: A bank of complementary, precomputed workflows is built offline; at query time, a router predicts which workflow in the portfolio best fits the incoming query and dispatches to it instead of building or reasoning about a workflow from scratch.
+    loop_shape: build workflow portfolio offline -> query arrives -> router predicts best-fit workflow -> dispatch to selected workflow -> execute
+    runtime_primitives:
+      - precomputed workflow portfolio
+      - query-to-workflow router
+      - complementarity criterion during portfolio construction
+    solves:
+      - re-deriving or re-reasoning about workflow structure for queries that resemble previously-seen task shapes
+    tradeoffs:
+      - portfolio only covers task shapes anticipated at build time
+      - router misprediction sends a query to a poorly-fitting workflow
+    sources:
+      - title: "FlowBank: Query-Adaptive Agentic Workflows Optimization through Precompute-and-Reuse"
+        url: "https://arxiv.org/abs/2606.11290"
+        type: paper
+    notes: "Opposite mechanism from Dynamic Workflow Generation: that technique synthesizes a new workflow per task at run time, this technique selects among a fixed, precomputed portfolio built offline."
 
   - name: Contract-Net / Auction-Based Delegation
     category: multi_agent_coordination

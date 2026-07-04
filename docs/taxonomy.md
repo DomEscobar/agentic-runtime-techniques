@@ -441,3 +441,32 @@ Main risk:
 
 - Traces without redaction can leak private context; logs without replay
   are only half useful.
+
+### 18. Cost, Latency, and Serving Runtime
+
+The system treats inference spend and serving efficiency as an explicit
+runtime concern, not an incidental property of whichever model or workflow a
+request happens to hit.
+
+Canonical shape:
+
+```text
+request/query -> route/place/cache decision against cost-quality tradeoff -> cheap path or escalate -> execute -> record cost
+```
+
+Examples:
+
+- Model Cascading / Tiered Routing
+- Semantic / Prompt Caching Layer
+- Cost-Aware Agentic Query Optimizer
+- Agent-Aware Serving Policy Layer
+
+Main value:
+
+- Keeps inference spend and latency proportional to task difficulty instead
+  of paying premium-model, premium-compute prices for every request.
+
+Main risk:
+
+- Misrouted or misclassified requests silently trade away quality for cost,
+  and the failure only shows up downstream.

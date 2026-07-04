@@ -54,6 +54,7 @@ Not included by default:
 - [Security and governance runtime patterns](docs/security-governance-patterns.md)
 - [Supervisor and swarm technique notes](docs/supervisor-swarm-techniques.md)
 - [Additional runtime patterns](docs/additional-runtime-patterns.md)
+- [2026 emerging runtime patterns](docs/2026-emerging-patterns.md)
 - [Machine-readable catalog](data/techniques.yml)
 - [Agent discovery index](data/agent-discovery-index.yml)
 - [Runtime analyses](analysis/)
@@ -77,8 +78,9 @@ Not included by default:
    [DeerFlow](docs/deer-flow-techniques.md),
    [Tau](docs/tau-harness-techniques.md),
    [Security/Governance](docs/security-governance-patterns.md),
-   [Supervisor/Swarm](docs/supervisor-swarm-techniques.md), and
-   [Additional runtime patterns](docs/additional-runtime-patterns.md).
+   [Supervisor/Swarm](docs/supervisor-swarm-techniques.md),
+   [Additional runtime patterns](docs/additional-runtime-patterns.md), and
+   [2026 emerging runtime patterns](docs/2026-emerging-patterns.md).
 
 For automated consumption, use `data/agent-discovery-index.yml` first, then
 follow its links into `data/techniques.yml` and the docs.
@@ -86,7 +88,7 @@ follow its links into `data/techniques.yml` and the docs.
 ## Initial Categories
 
 Categories 1-10 describe the shape of an agent's reasoning loop. Categories
-11-17 are cross-cutting runtime layers that wrap, gate, extend, or observe
+11-18 are cross-cutting runtime layers that wrap, gate, extend, or observe
 any of those loops; see [Taxonomy](docs/taxonomy.md) for the full writeup of
 each one.
 
@@ -109,11 +111,12 @@ each one.
 | 15. Harness and composition runtime | How is the reusable agent brain separated from session, UI, and persistence concerns? |
 | 16. Protocol and interop layers | How do tools and remote agents stay portable across frameworks? |
 | 17. Observability and provenance loops | How do runs become debuggable, auditable, and replayable? |
+| 18. Cost, latency, and serving runtime | How is inference spend and serving efficiency managed as an explicit runtime concern? |
 
 ## Seed Techniques
 
 `data/techniques.yml` is the single, complete canonical catalog of every
-technique in this repo (70+ entries as of this pass), each with a summary,
+technique in this repo (79 entries as of this pass), each with a summary,
 loop shape, runtime primitives, tradeoffs, and sourced references. The
 per-domain deep-dive docs (`docs/openclaw-hermes-techniques.md`,
 `docs/deer-flow-techniques.md`, `docs/tau-harness-techniques.md`,
@@ -134,11 +137,16 @@ architecture (MemGPT-style paging, episodic vector-store retrieval, Skill
 Library); cost and latency runtime (Model Cascading, Semantic/Prompt
 Caching); transactional safety (Saga/Compensating Transactions, Idempotency
 Keys); agent evaluation harnesses (Offline Regression Eval, Adversarial
-Red-Team loop); and runtime primitives (MCP, A2A, HITL, Guardrail Pipeline,
+Red-Team loop); runtime primitives (MCP, A2A, HITL, Guardrail Pipeline,
 Run Receipts, Context Packing, Task Queue, Stateful Harness,
 Prompt-Injection Firewall, Capability Runtime, Budget Policy Engine, Tool
 Reliability Scoring, Provenance Graph, Append-Only Session Log,
-Workflow-Graph Runtime).
+Workflow-Graph Runtime); and a 2026 emerging-patterns family from a
+DeepResearch arXiv sweep (Infinite Agentic Loop Static Analysis,
+Self-Healing Orchestrator, Workflow Portfolio Router, Meta-Tool Compiler,
+Cost-Aware Agentic Query Optimizer, Trajectory-Level Reward/Verifier,
+Memory Write-Manage-Read Loop, Agent-Aware Serving Policy Layer), detailed
+in [docs/2026-emerging-patterns.md](docs/2026-emerging-patterns.md).
 
 ## Naming Rule
 
