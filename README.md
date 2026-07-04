@@ -57,6 +57,7 @@ Not included by default:
 - [Machine-readable catalog](data/techniques.yml)
 - [Agent discovery index](data/agent-discovery-index.yml)
 - [Runtime analyses](analysis/)
+- [2026 arXiv runtime technique sweep](analysis/2026-arxiv-agentic-runtime-techniques.md)
 - [Contribution guide](CONTRIBUTING.md)
 
 ## How An Agent Should Use This Repo
