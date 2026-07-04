@@ -1,0 +1,116 @@
+status_date: "2026-07-04"
+local_sources:
+  openclaw_runtime: "/usr/lib/node_modules/openclaw"
+  openclaw_workspace: "/root/.openclaw"
+  agent_loop_flow_doc: "/root/.openclaw/media/inbound/agent-loop-flow---2167a633-95af-419c-a263-d952398e287a.md"
+  hermes_note: "No separate Hermes agents codebase found locally; only React Native Hermes packages in node_modules. Hermes adaptation appears in the local agent-loop document."
+techniques:
+  - name: Bootstrap Context Assembly
+    source: openclaw
+    category: context_engineering
+    evidence:
+      - "Workspace bootstrap files and runtime exports for resolveBootstrapContextForRun/resolveBootstrapFilesForRun."
+    catalog_action: add_or_expand
+  - name: Context Engine Lifecycle
+    source: openclaw
+    category: context_lifecycle
+    evidence:
+      - "Plugin SDK exports ContextEngine, assembleHarnessContextEngine, bootstrapHarnessContextEngine, finalizeHarnessContextEngineTurn."
+    catalog_action: add
+  - name: Preemptive Compaction
+    source: openclaw
+    category: context_compression
+    evidence:
+      - "Plugin SDK exports shouldPreemptivelyCompactBeforePrompt and compactContextEngineWithSafetyTimeout."
+    catalog_action: add
+  - name: Tool Schema Normalization
+    source: openclaw
+    category: tool_contract_enforcement
+    evidence:
+      - "Plugin SDK exports normalizeAgentRuntimeTools, normalizeProviderToolSchemas, inspectRuntimeToolInputSchemas."
+    catalog_action: add
+  - name: Before/After Tool Hooks
+    source: openclaw
+    category: tool_policy
+    evidence:
+      - "Plugin SDK exports runBeforeToolCallHook, wrapToolWithBeforeToolCallHook, runAgentHarnessAfterToolCallHook."
+    catalog_action: add
+  - name: Deferred Tool Approval
+    source: openclaw
+    category: human_in_the_loop
+    evidence:
+      - "Plugin SDK exports requestDeferredPluginToolApproval and DeferredPluginToolApproval."
+    catalog_action: add
+  - name: Session Write Lock
+    source: openclaw
+    category: concurrency_control
+    evidence:
+      - "Plugin SDK exports acquireSessionWriteLock and write-lock timeout config."
+    catalog_action: add
+  - name: Subagent Spawn Controls
+    source: openclaw
+    category: multi_agent_delegation
+    evidence:
+      - "Config types expose sessions_spawn, maxSpawnDepth, maxChildrenPerAgent, maxConcurrent, runTimeoutSeconds."
+    catalog_action: add_or_expand
+  - name: Heartbeat Loop
+    source: openclaw
+    category: durable_runtime_loop
+    evidence:
+      - "Config types expose heartbeat interval, active hours, lightContext, isolatedSession, skipWhenBusy."
+      - "Runtime defines HEARTBEAT_PROMPT and HEARTBEAT_OK."
+    catalog_action: expand
+  - name: Structured Heartbeat Checkpoint
+    source: openclaw
+    category: checkpoint_status
+    evidence:
+      - "HeartbeatToolResponse supports outcome, notify, summary, priority, nextCheck."
+    catalog_action: add
+  - name: Cron Runtime
+    source: openclaw
+    category: scheduler
+    evidence:
+      - "Runtime files include cron, server-cron, cron-store-runtime, cron-snapshot.runtime."
+    catalog_action: add
+  - name: Delivery Planning
+    source: openclaw
+    category: output_routing
+    evidence:
+      - "Runtime files include delivery-plan, delivery-queue, delivery-target, pending-final-delivery."
+    catalog_action: add
+  - name: Stuck Session Recovery
+    source: openclaw
+    category: failure_recovery
+    evidence:
+      - "Runtime files include diagnostic-stuck-session-recovery, session locks, snapshots, transcript repair."
+    catalog_action: add
+  - name: Skill Extraction
+    source: hermes_adaptation
+    category: reflection_memory
+    evidence:
+      - "Local loop-flow doc says successful planning runs are stored as reusable patterns."
+    catalog_action: add
+  - name: Skill Reinjection
+    source: hermes_adaptation
+    category: context_shaping
+    evidence:
+      - "Local loop-flow doc says top relevant memory skills are injected into prompts."
+    catalog_action: add
+  - name: Verifiability Gate
+    source: local_agent_loop_doc
+    category: evaluator_gate
+    evidence:
+      - "Local loop-flow doc routes only rubric-verifiable tasks into evaluator loops."
+    catalog_action: add
+  - name: Trigger-Gated Evaluator Optimizer
+    source: local_agent_loop_doc
+    category: verification_loop
+    evidence:
+      - "Local loop-flow doc evaluates only on uncertainty, contradictions, coverage gaps, tool mismatch, or low confidence."
+    catalog_action: add
+  - name: Circuit Breaker
+    source: local_agent_loop_doc
+    category: budget_enforcement
+    evidence:
+      - "Local loop-flow doc sets max LLM calls and max eval loops with HITL fallback."
+    catalog_action: add
