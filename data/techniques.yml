@@ -234,3 +234,217 @@ techniques:
       - weak tests weaken the loop
       - reviewer can share blind spots with implementer
     sources: []
+
+  - name: Blackboard / Shared Workspace Coordination
+    category: multi_agent_coordination
+    summary: Specialist agents coordinate through a shared workspace that stores tasks, claims, evidence, conflicts, and artifacts.
+    loop_shape: goal -> blackboard -> agents post claims -> arbiter/synthesizer -> answer
+    runtime_primitives:
+      - shared blackboard state
+      - capability subscriptions
+      - claim and evidence records
+      - conflict markers
+      - arbiter or synthesizer
+    solves:
+      - loose multi-agent collaboration
+      - inspectable partial work
+    tradeoffs:
+      - stale claims and noisy boards
+      - arbitration can become a hidden supervisor
+    sources:
+      - title: "Blackboard Multi-Agent Systems for Information Discovery in Data Science"
+        url: "https://research.google/pubs/blackboard-multi-agent-systems-for-information-discovery-in-data-science/"
+        type: paper
+
+  - name: Multi-Agent Debate / Committee Deliberation
+    category: multi_agent_deliberation
+    summary: Multiple agents independently propose answers, critique one another over debate rounds, and converge through a judge, vote, or stability check.
+    loop_shape: propose -> debate -> judge/vote -> final
+    runtime_primitives:
+      - proposer agents
+      - debate transcript
+      - round budget
+      - aggregation policy
+      - convergence criterion
+    solves:
+      - reasoning diversity
+      - contradiction discovery
+    tradeoffs:
+      - high token and latency cost
+      - weak agents can reinforce wrong consensus
+    sources:
+      - title: "Improving Factuality and Reasoning in Language Models through Multiagent Debate"
+        url: "https://arxiv.org/abs/2305.14325"
+        type: paper
+
+  - name: Agent-as-Judge / Referee Team
+    category: evaluation_runtime
+    summary: Judge agents score candidate artifacts against a rubric and route the workflow to accept, revise, reject, or escalate.
+    loop_shape: candidate -> judge -> accept/revise/reject
+    runtime_primitives:
+      - rubric
+      - judge agent or panel
+      - score schema
+      - acceptance threshold
+      - revision route
+    solves:
+      - explicit quality gates
+      - runtime evaluation
+    tradeoffs:
+      - judge bias
+      - rubric calibration
+    sources:
+      - title: "Enhancing LLM-as-a-Judge via Multi-Agent Collaboration"
+        url: "https://cdn.amazon.science/48/5d/20927f094559a4465916e28f41b5/enhancing-llm-as-a-judge-via-multi-agent-collaboration.pdf"
+        type: paper
+
+  - name: A2A / Agent Interoperability Protocol Layer
+    category: agent_interop_protocol
+    summary: Remote agents are discovered and invoked through capability manifests, task IDs, streaming status, and artifact contracts.
+    loop_shape: discover agent card -> send/stream task -> status/artifacts -> complete
+    runtime_primitives:
+      - agent card
+      - authenticated endpoint
+      - task ID
+      - status contract
+      - artifacts
+    solves:
+      - cross-framework delegation
+      - long-running remote agent work
+    tradeoffs:
+      - trust and auth complexity
+      - hidden remote implementation details
+    sources:
+      - title: "Announcing the Agent2Agent Protocol"
+        url: "https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability/"
+        type: article
+
+  - name: MCP Tool / Context Protocol Layer
+    category: tool_context_protocol
+    summary: Tools, resources, and prompts are exposed by protocol servers and invoked by model hosts through clients.
+    loop_shape: host -> client -> server -> tool/resource/prompt -> result
+    runtime_primitives:
+      - host
+      - client
+      - server
+      - tool schema
+      - resources
+      - prompts
+    solves:
+      - portable tool integration
+      - schema-based context/tool discovery
+    tradeoffs:
+      - still needs host-side authorization
+      - protocol plumbing is not agent reasoning
+    sources:
+      - title: "Model Context Protocol Specification"
+        url: "https://modelcontextprotocol.io/specification/2025-06-18"
+        type: spec
+
+  - name: HITL Interrupt / Approval Gate
+    category: human_in_the_loop
+    summary: Risky actions pause at a checkpoint for a human approve, edit, or reject decision before the run resumes.
+    loop_shape: proposed action -> policy -> interrupt -> human decision -> resume
+    runtime_primitives:
+      - risk policy
+      - pending action record
+      - interrupt checkpoint
+      - human decision
+      - resume semantics
+    solves:
+      - risky action governance
+      - human approval without losing runtime state
+    tradeoffs:
+      - approval fatigue
+      - policy tuning
+    sources:
+      - title: "Human-in-the-loop"
+        url: "https://docs.langchain.com/oss/python/langchain/human-in-the-loop"
+        type: docs
+
+  - name: Guardrail Pipeline
+    category: runtime_policy
+    summary: Runtime policy stages inspect inputs, tool calls, handoffs, and outputs and can block, transform, escalate, or continue.
+    loop_shape: input guardrails -> model/tool/handoff -> output guardrails -> route
+    runtime_primitives:
+      - input guardrails
+      - tool guardrails
+      - handoff policy
+      - output guardrails
+      - trace event
+    solves:
+      - boundary-specific safety checks
+      - inspectable policy failures
+    tradeoffs:
+      - false positives
+      - coverage gaps between runtime boundaries
+    sources:
+      - title: "OpenAI Agents SDK Guardrails"
+        url: "https://openai.github.io/openai-agents-python/guardrails/"
+        type: docs
+
+  - name: Run Receipt / Trace-First Runtime
+    category: observability
+    summary: Agent runs emit structured records of model calls, tool calls, handoffs, guardrails, artifacts, costs, and final state.
+    loop_shape: run -> trace events -> inspect/evaluate/replay
+    runtime_primitives:
+      - run ID
+      - trace spans
+      - artifact links
+      - cost records
+      - redaction policy
+    solves:
+      - debugging
+      - audit
+      - evaluation over real runs
+    tradeoffs:
+      - traces can leak private context
+      - logs without replay are only partially useful
+    sources:
+      - title: "OpenAI Agents SDK Tracing"
+        url: "https://openai.github.io/openai-agents-python/tracing/"
+        type: docs
+
+  - name: Context Packing / Compression Loop
+    category: context_runtime
+    summary: The runtime ranks, filters, packs, summarizes, or drops context before model calls and updates summaries after the run.
+    loop_shape: sources -> rank/filter -> pack -> budget check -> summarize/drop -> model
+    runtime_primitives:
+      - source inventory
+      - relevance ranker
+      - context budget
+      - summary artifacts
+      - compression trigger
+    solves:
+      - long-running context management
+      - prompt budget pressure
+    tradeoffs:
+      - important details can be compressed away
+      - hidden summaries need provenance
+    sources:
+      - title: "DeerFlow technique notes"
+        url: "docs/deer-flow-techniques.md"
+        type: local
+
+  - name: Task Queue / Resumable Workflow Runtime
+    category: durable_runtime
+    summary: Agent work is represented as durable tasks that can checkpoint, report status, retry, sleep, and resume after failure.
+    loop_shape: request -> enqueue -> worker -> checkpoint/status -> resume/retry/done
+    runtime_primitives:
+      - task ID
+      - queue
+      - worker lease
+      - checkpoint
+      - status contract
+      - retry/backoff
+    solves:
+      - background agent work
+      - long-running execution
+      - crash recovery
+    tradeoffs:
+      - idempotency requirements
+      - partial side effects need compensation
+    sources:
+      - title: "LangGraph overview"
+        url: "https://docs.langchain.com/oss/python/langgraph/overview"
+        type: docs

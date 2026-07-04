@@ -1,0 +1,152 @@
+status_date: "2026-07-04"
+techniques:
+  - name: Blackboard / Shared Workspace Coordination
+    category: multi_agent_coordination
+    loop_shape: "goal -> blackboard -> agents watch/post claims -> arbiter/synthesizer -> answer"
+    runtime_primitives:
+      - shared blackboard state
+      - capability subscriptions
+      - claim/evidence records
+      - conflict markers
+      - arbiter or synthesizer
+      - freshness controls
+    tier: "B"
+    sources:
+      - https://research.google/pubs/blackboard-multi-agent-systems-for-information-discovery-in-data-science/
+      - https://aws.amazon.com/blogs/devops/multi-agent-collaboration-with-strands/
+
+  - name: Multi-Agent Debate / Committee Deliberation
+    category: multi_agent_deliberation
+    loop_shape: "question -> independent answers -> debate rounds -> judge/vote/stability check -> final"
+    runtime_primitives:
+      - proposer agents
+      - debate transcript
+      - round budget
+      - aggregation policy
+      - convergence criterion
+    tier: "A/B boundary"
+    sources:
+      - https://arxiv.org/abs/2305.14325
+      - https://arxiv.org/abs/2511.07784
+
+  - name: Agent-as-Judge / Referee Team
+    category: evaluation_runtime
+    loop_shape: "candidate -> judge(s) -> rubric score -> accept/revise/reject"
+    runtime_primitives:
+      - rubric
+      - candidate artifact
+      - judge agent or panel
+      - score schema
+      - acceptance threshold
+      - revision route
+    tier: "B"
+    sources:
+      - https://cdn.amazon.science/48/5d/20927f094559a4465916e28f41b5/enhancing-llm-as-a-judge-via-multi-agent-collaboration.pdf
+      - https://arxiv.org/html/2510.12697v1
+
+  - name: A2A / Agent Interoperability Protocol Layer
+    category: agent_interop_protocol
+    loop_shape: "discover agent card -> send/stream task -> status/artifacts -> complete"
+    runtime_primitives:
+      - agent card
+      - authenticated endpoint
+      - task ID
+      - send/stream/poll operations
+      - status contract
+      - artifacts
+    tier: "B/C boundary"
+    sources:
+      - https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability/
+      - https://codelabs.developers.google.com/intro-a2a-purchasing-concierge
+
+  - name: MCP Tool/Context Protocol Layer
+    category: tool_context_protocol
+    loop_shape: "host -> client -> server -> tool/resource/prompt -> result"
+    runtime_primitives:
+      - host
+      - client
+      - server
+      - tool schema
+      - resources
+      - prompts
+      - JSON-RPC transport
+    tier: "B"
+    sources:
+      - https://modelcontextprotocol.io/specification/2025-06-18
+      - https://modelcontextprotocol.io/specification/2025-06-18/server/tools
+
+  - name: HITL Interrupt / Approval Gate
+    category: human_in_the_loop
+    loop_shape: "tool proposal -> policy check -> interrupt -> approve/edit/reject -> resume"
+    runtime_primitives:
+      - risk policy
+      - pending action record
+      - interrupt checkpoint
+      - human decision
+      - resume semantics
+      - audit trail
+    tier: "B"
+    sources:
+      - https://docs.langchain.com/oss/python/langchain/human-in-the-loop
+      - https://docs.langchain.com/oss/python/langgraph/overview
+
+  - name: Guardrail Pipeline
+    category: runtime_policy
+    loop_shape: "input guardrails -> model/tool/handoff -> output guardrails -> route"
+    runtime_primitives:
+      - input guardrails
+      - tool guardrails
+      - handoff policy
+      - output guardrails
+      - block/escalate/continue route
+      - trace event
+    tier: "B"
+    sources:
+      - https://openai.github.io/openai-agents-python/guardrails/
+      - https://openai.github.io/openai-agents-python/tracing/
+
+  - name: Run Receipt / Trace-First Runtime
+    category: observability
+    loop_shape: "run -> trace events -> inspect/evaluate/replay"
+    runtime_primitives:
+      - run ID
+      - trace spans
+      - artifact links
+      - cost records
+      - redaction policy
+      - replay or support bundle
+    tier: "B"
+    sources:
+      - https://openai.github.io/openai-agents-python/tracing/
+      - https://developers.openai.com/api/docs/guides/agents
+
+  - name: Context Packing / Compression Loop
+    category: context_runtime
+    loop_shape: "sources -> rank/filter -> pack -> budget check -> summarize/drop -> model"
+    runtime_primitives:
+      - source inventory
+      - relevance ranker
+      - context budget
+      - summary artifacts
+      - compression trigger
+      - memory update
+    tier: "B"
+    sources:
+      - ../docs/deer-flow-techniques.md
+      - ../docs/openclaw-hermes-techniques.md
+
+  - name: Task Queue / Resumable Workflow Runtime
+    category: durable_runtime
+    loop_shape: "request -> enqueue -> worker -> checkpoint/status -> resume/retry/done"
+    runtime_primitives:
+      - task ID
+      - queue
+      - worker lease
+      - checkpoint
+      - status contract
+      - retry/backoff
+      - artifacts
+    tier: "B"
+    sources:
+      - https://docs.langchain.com/oss/python/langgraph/overview
+      - ../docs/openclaw-hermes-techniques.md

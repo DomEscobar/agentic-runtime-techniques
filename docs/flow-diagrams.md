@@ -1013,3 +1013,301 @@ Branch notes:
 - Useful when domains are too large for one supervisor.
 - Adds coordination cost and more places for information loss.
 - Needs explicit ownership, delegation limits, and result contracts.
+
+## 26. Blackboard / Shared Workspace Coordination
+
+```text
+Goal / problem
+    |
+    v
++--------------------------+
+| Shared blackboard        |
+| tasks, claims, evidence  |
++--------------------------+
+    |
+    +-------------+--------------+-------------+
+    |             |              |             |
+    v             v              v             v
++---------+   +---------+    +---------+   +---------+
+|Agent A  |   |Agent B  |    |Agent C  |   |Agent D  |
++---------+   +---------+    +---------+   +---------+
+    |             |              |             |
+    +-------------+--------------+-------------+
+                  |
+                  v
+          +--------------------------+
+          | Post updates / conflicts |
+          +--------------------------+
+                  |
+                  v
+          +--------------------------+
+          | Arbiter / synthesizer    |
+          +--------------------------+
+              | enough        | gaps/conflicts
+              v               v
+          Final answer     Back to blackboard
+```
+
+Branch notes:
+
+- Agents coordinate through shared state, not direct chat.
+- The blackboard needs freshness and ownership rules.
+
+## 27. Multi-Agent Debate / Committee Deliberation
+
+```text
+Question
+   |
+   v
++--------------------------+
+| Independent proposals    |
++--------------------------+
+   |
+   +-----------+-----------+
+   |           |           |
+   v           v           v
+Agent A     Agent B     Agent C
+   |           |           |
+   +-----------+-----------+
+               |
+               v
+      +--------------------------+
+      | Debate / critique round  |
+      +--------------------------+
+               |
+               v
+      +--------------------------+
+      | Stable or budget spent?  |
+      +--------------------------+
+          | yes             no
+          v                v
+   Judge / vote /       Next debate
+   aggregate            round
+          |
+          v
+       Final
+```
+
+Branch notes:
+
+- Debate is useful only when diversity and correction beat added cost.
+- Needs a round budget and a final aggregation rule.
+
+## 28. Agent-as-Judge / Referee Team
+
+```text
+Candidate artifact
+    |
+    v
++--------------------------+
+| Rubric / acceptance spec |
++--------------------------+
+    |
+    v
++--------------------------+
+| Judge or referee panel   |
++--------------------------+
+    |
+    v
++--------------------------+
+| Decision                 |
++--------------------------+
+  | accept      | revise       | reject/escalate
+  v             v              v
+Output      Back to worker   Human / failure
+```
+
+Branch notes:
+
+- This is a runtime gate, not just offline eval.
+- Strong versions keep score schemas and rationale separate from the final
+  artifact.
+
+## 29. A2A / Agent Interoperability Protocol Layer
+
+```text
+Local agent
+    |
+    v
++--------------------------+
+| Discover agent card      |
++--------------------------+
+    |
+    v
++--------------------------+
+| Can remote agent help?   |
++--------------------------+
+    | yes                         no
+    v                             v
++--------------------------+   Use local route
+| Send / stream task       |
++--------------------------+
+    |
+    v
++--------------------------+
+| Status / artifact events |
++--------------------------+
+    |
+    v
++--------------------------+
+| Done?                    |
++--------------------------+
+    | yes          no
+    v             v
+ Use result    Poll / stream
+```
+
+Branch notes:
+
+- Remote agents become task endpoints with capability manifests.
+- Trust, auth, status semantics, and artifacts matter as much as prompts.
+
+## 30. MCP Tool / Context Protocol Layer
+
+```text
+LLM host
+   |
+   v
++--------------------------+
+| MCP client               |
++--------------------------+
+   |
+   v
++--------------------------+
+| Server capability list   |
+| tools/resources/prompts  |
++--------------------------+
+   |
+   v
++--------------------------+
+| Invoke tool/resource?    |
++--------------------------+
+   | yes                         no
+   v                             v
++--------------------------+   Continue model
+| MCP server executes      |
++--------------------------+
+   |
+   v
++--------------------------+
+| Result to host/model     |
++--------------------------+
+```
+
+Branch notes:
+
+- MCP is a protocol substrate, not an agent brain.
+- Host-side authorization and context minimization still matter.
+
+## 31. HITL Interrupt / Approval Gate
+
+```text
+Proposed action
+    |
+    v
++--------------------------+
+| Policy check             |
++--------------------------+
+    |
+    v
++--------------------------+
+| Human review required?   |
++--------------------------+
+    | yes                         no
+    v                             v
++--------------------------+   Execute action
+| Interrupt + checkpoint   |
++--------------------------+
+    |
+    v
++--------------------------+
+| Human decision           |
++--------------------------+
+  | approve    | edit         | reject
+  v            v              v
+Execute     Execute edited   Resume alternate path
+```
+
+Branch notes:
+
+- The pending action needs exact arguments, not a vague summary.
+- Resume semantics are part of the pattern.
+
+## 32. Guardrail Pipeline
+
+```text
+Input
+  |
+  v
++--------------------------+
+| Input guardrails         |
++--------------------------+
+  | pass        | block/escalate
+  v             v
+Model run     Stop / human
+  |
+  v
++--------------------------+
+| Tool or handoff proposed |
++--------------------------+
+  |
+  v
++--------------------------+
+| Boundary-specific policy |
++--------------------------+
+  | pass        | block/escalate
+  v             v
+Execute       Stop / human
+  |
+  v
++--------------------------+
+| Output guardrails        |
++--------------------------+
+  | pass        | revise/block
+  v             v
+Final        Back to model / human
+```
+
+Branch notes:
+
+- Different boundaries need different checks.
+- Guardrail events should be traced.
+
+## 33. Task Queue / Resumable Workflow Runtime
+
+```text
+Request
+   |
+   v
++--------------------------+
+| Enqueue task             |
++--------------------------+
+   |
+   v
++--------------------------+
+| Worker leases task       |
++--------------------------+
+   |
+   v
++--------------------------+
+| Run step                 |
++--------------------------+
+   |
+   v
++--------------------------+
+| Checkpoint / status      |
++--------------------------+
+   |
+   v
++--------------------------+
+| Terminal?                |
++--------------------------+
+   | done       | wait/sleep   | fail/retry
+   v            v             v
+Complete    Resume later   Backoff / new worker
+```
+
+Branch notes:
+
+- This turns agent work into durable jobs instead of chat turns.
+- Requires idempotency, leases, and honest status contracts.

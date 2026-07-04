@@ -41,6 +41,7 @@ Not included by default:
 - [OpenClaw and Hermes technique notes](docs/openclaw-hermes-techniques.md)
 - [DeerFlow technique notes](docs/deer-flow-techniques.md)
 - [Supervisor and swarm technique notes](docs/supervisor-swarm-techniques.md)
+- [Additional runtime patterns](docs/additional-runtime-patterns.md)
 - [Machine-readable catalog](data/techniques.yml)
 - [Contribution guide](CONTRIBUTING.md)
 
