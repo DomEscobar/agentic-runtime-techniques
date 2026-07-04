@@ -11,6 +11,7 @@ reliable for its job.
 | Need | Start With | Add When Needed | Avoid When |
 | --- | --- | --- | --- |
 | Simple tool-using assistant | ReAct / core tool loop | verifier, loop breaker, context packing | task is long-running or high-risk |
+| Reusable interactive agent brain | Stateful harness around pure loop | steering queues, cancellation, event stream | one-shot stateless API call |
 | Long task with visible progress | Plan-and-execute | todo state, verifier, status contract | task can be answered in one pass |
 | Correctness matters | Verifier / goal loop | judge, tests, rubric, typed blockers | no objective check exists |
 | Open-ended research | Research loop | source ledger, gap analysis, citation verifier | sources are unavailable or untrusted |
@@ -49,6 +50,35 @@ Upgrade path:
 
 Do not stop at "the model can call tools." A production tool loop needs policy,
 error handling, observability, and termination.
+
+### If the system needs a reusable interactive agent brain
+
+Base pattern:
+
+- Stateful harness around pure agent loop
+
+Required runtime primitives:
+
+- caller-owned transcript
+- stateless provider/tool loop
+- provider-neutral event stream
+- single-runner invariant
+- steering and follow-up queues
+- cancellation token
+- interrupted tool-call repair
+
+Upgrade path:
+
+- Add durable session storage outside the harness.
+- Add run receipts or tracing from the event stream.
+- Add task queue semantics if runs can outlive the frontend process.
+
+Main decision:
+
+- If the agent is an app or frontend surface, use a harness.
+- If the agent is only a one-shot API call, a harness may be unnecessary.
+- If cancellation is possible, repair dangling tool calls before the next model
+  request.
 
 ### If the system must finish multi-step work
 
@@ -210,6 +240,7 @@ Anti-pattern:
 
 ```text
 Intent router
+  -> stateful harness
   -> ReAct tool loop
   -> tool error recovery
   -> loop/token breaker
@@ -240,6 +271,7 @@ Use when:
 
 ```text
 Repo inspection
+  -> stateful harness
   -> plan/todos
   -> edit loop
   -> tests

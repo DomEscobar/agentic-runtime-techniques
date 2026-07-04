@@ -1,0 +1,67 @@
+status_date: "2026-07-04"
+sources:
+  - https://github.com/huggingface/tau/blob/main/src/tau_agent/harness.py
+  - https://github.com/huggingface/tau/blob/main/src/tau_agent/loop.py
+  - https://github.com/huggingface/tau/blob/main/src/tau_agent/events.py
+  - https://github.com/huggingface/tau/blob/main/src/tau_agent/tools.py
+techniques:
+  - name: Stateful Harness Around Pure Agent Loop
+    category: harness_runtime
+    summary: "A stateful reusable harness owns transcript, queues, cancellation, listeners, and repair semantics while delegating model/tool execution to a stateless provider-tool loop."
+    loop_shape: "frontend/session -> harness state -> pure loop -> provider-neutral events -> frontend/session"
+    runtime_primitives:
+      - caller-owned transcript
+      - pure loop function
+      - harness-owned running flag
+      - event listeners
+      - cancellation token
+      - steering queue
+      - follow-up queue
+      - interrupted tool-call repair
+    solves:
+      - reusable agent brain across frontends
+      - safe interactive steering
+      - transcript validity after cancellation
+      - separation of core loop from UI/session concerns
+    risks:
+      - queue semantics must be clear to users
+      - transcript mutation still needs single-runner protection
+      - durable persistence must be implemented by an outer layer
+    tier: "B"
+
+  - name: Steering and Follow-Up Queues
+    category: interactive_runtime
+    summary: "Active user input is queued as either steering for the current run or follow-up for when the agent would otherwise stop."
+    loop_shape: "running agent -> queued steering/follow-up -> drain at safe boundary -> continue"
+    runtime_primitives:
+      - steering queue
+      - follow-up queue
+      - queue update event
+      - queue mode one_at_a_time or all
+      - safe drain callbacks
+    solves:
+      - user input during active runs
+      - racing prompt submissions
+      - interactive agent UX
+    risks:
+      - injected messages can change task direction
+      - all-at-once draining can overload context
+    tier: "B"
+
+  - name: Interrupted Tool-Call Repair
+    category: tool_loop_repair
+    summary: "If cancellation leaves assistant tool calls without matching tool results, append synthetic failed tool results before the next provider request."
+    loop_shape: "cancel/interruption -> scan latest tool-call assistant -> append missing failed tool results -> continue"
+    runtime_primitives:
+      - open tool-call scan
+      - returned tool-call ID set
+      - synthetic failed tool result
+      - repair before prompt or continue
+    solves:
+      - provider-invalid transcript after interruption
+      - dangling tool calls
+      - cancellation consistency
+    risks:
+      - synthetic failure content should be explicit
+      - partial side effects still need separate compensation
+    tier: "A/B boundary"

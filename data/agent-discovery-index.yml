@@ -31,6 +31,7 @@ use_cases:
     base_pattern: "ReAct"
     recommended_stack:
       - "Intent / Context / Routing Front Door"
+      - "Stateful Harness Around Pure Agent Loop"
       - "Core ReAct / Tool Loop"
       - "Tool error recovery"
       - "Loop Detection Circuit Breaker"
@@ -56,12 +57,15 @@ use_cases:
       - "The action risk requires human approval before execution."
     docs:
       - "../docs/flow-diagrams.md#1-core-react--tool-loop"
+      - "../docs/flow-diagrams.md#34-stateful-harness-around-pure-agent-loop"
+      - "../docs/tau-harness-techniques.md"
       - "../docs/decision-guide.md#if-the-system-must-use-tools"
 
   - id: multi_step_task_agent
     goal: "Complete a larger task through visible, inspectable steps."
     base_pattern: "Plan-and-Execute"
     recommended_stack:
+      - "Stateful Harness Around Pure Agent Loop"
       - "Intent / Context / Routing Front Door"
       - "Plan-and-Execute Loop"
       - "Plan mode todo loop"
@@ -76,6 +80,7 @@ use_cases:
     optional_patterns:
       - "Task Queue / Resumable Workflow Runtime"
       - "Agent-as-Judge / Referee Team"
+      - "Steering and Follow-Up Queues"
     failure_modes:
       - stale plan
       - fake progress
@@ -152,6 +157,7 @@ use_cases:
     base_pattern: "Coding Harness Loop"
     recommended_stack:
       - "Repo inspection"
+      - "Stateful Harness Around Pure Agent Loop"
       - "Plan / todos"
       - "Read-Before-Write File Gate"
       - "Coding Harness Loop"
@@ -167,6 +173,7 @@ use_cases:
       - "SWE-agent / Agent-Computer Interface"
       - "Ralph / Bounded Retry Loop"
       - "Implement / Review / Merge"
+      - "Steering and Follow-Up Queues"
     failure_modes:
       - unverified edits
       - unrelated refactor
@@ -177,6 +184,7 @@ use_cases:
       - "No safe edit or verification boundary exists."
     docs:
       - "../docs/flow-diagrams.md#19-coding-harness-loop"
+      - "../docs/tau-harness-techniques.md"
       - "../docs/decision-guide.md#if-the-system-edits-code"
 
   - id: multi_agent_system
@@ -217,6 +225,7 @@ use_cases:
     base_pattern: "Task Queue / Resumable Workflow Runtime"
     recommended_stack:
       - "Task queue"
+      - "Stateful Harness Around Pure Agent Loop"
       - "Worker lease"
       - "Checkpoint / status"
       - "Retry / backoff"
@@ -233,6 +242,7 @@ use_cases:
       - "HITL Interrupt / Approval Gate"
       - "Guardrail Pipeline"
       - "Context Packing / Compression Loop"
+      - "Interrupted Tool-Call Repair"
     failure_modes:
       - lost progress
       - duplicate side effects

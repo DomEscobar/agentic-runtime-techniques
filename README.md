@@ -50,6 +50,7 @@ Not included by default:
 - [Benchmark/date tier list](docs/tier-list.md)
 - [OpenClaw and Hermes technique notes](docs/openclaw-hermes-techniques.md)
 - [DeerFlow technique notes](docs/deer-flow-techniques.md)
+- [Tau harness technique notes](docs/tau-harness-techniques.md)
 - [Supervisor and swarm technique notes](docs/supervisor-swarm-techniques.md)
 - [Additional runtime patterns](docs/additional-runtime-patterns.md)
 - [Machine-readable catalog](data/techniques.yml)
@@ -71,6 +72,7 @@ Not included by default:
 6. Read the implementation notes for production examples:
    [OpenClaw/Hermes](docs/openclaw-hermes-techniques.md),
    [DeerFlow](docs/deer-flow-techniques.md),
+   [Tau](docs/tau-harness-techniques.md),
    [Supervisor/Swarm](docs/supervisor-swarm-techniques.md), and
    [Additional runtime patterns](docs/additional-runtime-patterns.md).
 

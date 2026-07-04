@@ -1311,3 +1311,69 @@ Branch notes:
 
 - This turns agent work into durable jobs instead of chat turns.
 - Requires idempotency, leases, and honest status contracts.
+
+## 34. Stateful Harness Around Pure Agent Loop
+
+```text
+Frontend / session layer
+    |
+    v
++--------------------------+
+| AgentHarness             |
+| transcript, queues,      |
+| listeners, cancellation  |
++--------------------------+
+    |
+    v
++--------------------------+
+| run_agent_loop           |
+| provider + tools         |
++--------------------------+
+    |
+    v
++--------------------------+
+| Provider-neutral events  |
++--------------------------+
+    |
+    v
+Frontend renders / persists
+```
+
+Interactive branches:
+
+```text
+Run active?
+   | no                          yes
+   v                             v
+prompt/continue             queue user input
+                                  |
+                                  v
+                          steering or follow-up?
+                             | steering      | follow-up
+                             v               v
+                    inject after safe    inject when agent
+                    turn/tool boundary   would otherwise stop
+```
+
+Cancellation/repair branch:
+
+```text
+cancel run
+   |
+   v
+assistant tool calls missing results?
+   | no                          yes
+   v                             v
+resume normally             append failed tool results
+                                  |
+                                  v
+                            next provider request is valid
+```
+
+Branch notes:
+
+- The pure loop stays stateless; the harness owns transcript and runtime state.
+- Queues preserve a single-runner invariant while still allowing interactive
+  steering.
+- Interrupted tool-call repair keeps OpenAI-compatible transcripts valid after
+  cancellation.

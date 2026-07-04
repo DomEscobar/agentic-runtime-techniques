@@ -448,3 +448,33 @@ techniques:
       - title: "LangGraph overview"
         url: "https://docs.langchain.com/oss/python/langgraph/overview"
         type: docs
+
+  - name: Stateful Harness Around Pure Agent Loop
+    category: harness_runtime
+    summary: A reusable harness owns transcript, queueing, cancellation, listeners, and repair semantics while delegating model/tool execution to a stateless loop that emits provider-neutral events.
+    loop_shape: frontend/session -> harness state -> pure loop -> provider-neutral events -> frontend/session
+    runtime_primitives:
+      - caller-owned transcript
+      - pure loop function
+      - provider-neutral event stream
+      - steering queue
+      - follow-up queue
+      - single-runner invariant
+      - cancellation token
+      - interrupted tool-call repair
+    solves:
+      - reusable agent brain across frontends
+      - safe interactive steering
+      - transcript validity after cancellation
+      - separation of core loop from UI and session concerns
+    tradeoffs:
+      - outer layer still owns durable persistence
+      - queue semantics need clear UX
+      - transcript mutation needs single-runner protection
+    sources:
+      - title: "Tau AgentHarness"
+        url: "https://github.com/huggingface/tau/blob/main/src/tau_agent/harness.py"
+        type: code
+      - title: "Tau pure agent loop"
+        url: "https://github.com/huggingface/tau/blob/main/src/tau_agent/loop.py"
+        type: code
