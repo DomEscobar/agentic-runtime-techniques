@@ -32,7 +32,7 @@ use_cases:
     recommended_stack:
       - "Intent / Context / Routing Front Door"
       - "Stateful Harness Around Pure Agent Loop"
-      - "Core ReAct / Tool Loop"
+      - "ReAct"
       - "Tool error recovery"
       - "Loop Detection Circuit Breaker"
       - "Token Budget Circuit Breaker"
@@ -44,9 +44,9 @@ use_cases:
       - error-to-observation handling
       - loop budget
     optional_patterns:
-      - "Verifier / Goal Loop"
+      - "Codex Goal / Verifier Loop"
       - "Guardrail Pipeline"
-      - "MCP Tool/Context Protocol Layer"
+      - "MCP Tool / Context Protocol Layer"
     failure_modes:
       - infinite tool loop
       - tool hallucination
@@ -67,9 +67,9 @@ use_cases:
     recommended_stack:
       - "Stateful Harness Around Pure Agent Loop"
       - "Intent / Context / Routing Front Door"
-      - "Plan-and-Execute Loop"
-      - "Plan mode todo loop"
-      - "Verifier / Goal Loop"
+      - "Plan-and-Execute"
+      - "Plan-Mode Todo Loop"
+      - "Codex Goal / Verifier Loop"
       - "Run Receipt / Trace-First Runtime"
     required_primitives:
       - plan artifact
@@ -94,9 +94,9 @@ use_cases:
 
   - id: correctness_critical_agent
     goal: "Optimize for correct completion rather than speed."
-    base_pattern: "Verifier / Goal Loop"
+    base_pattern: "Codex Goal / Verifier Loop"
     recommended_stack:
-      - "Verifier / Goal Loop"
+      - "Codex Goal / Verifier Loop"
       - "Agent-as-Judge / Referee Team"
       - "Typed blocker states"
       - "Bounded retry"
@@ -123,9 +123,9 @@ use_cases:
 
   - id: research_agent
     goal: "Produce source-grounded answers from external or changing information."
-    base_pattern: "Research Loop"
+    base_pattern: "Deep Research Loop"
     recommended_stack:
-      - "Research Loop"
+      - "Deep Research Loop"
       - "Source ledger"
       - "Context Packing / Compression Loop"
       - "Gap analysis"
@@ -171,7 +171,7 @@ use_cases:
       - failure report
     optional_patterns:
       - "SWE-agent / Agent-Computer Interface"
-      - "Ralph / Bounded Retry Loop"
+      - "Ralph Loop"
       - "Implement / Review / Merge"
       - "Steering and Follow-Up Queues"
     failure_modes:
@@ -242,7 +242,7 @@ use_cases:
       - "HITL Interrupt / Approval Gate"
       - "Guardrail Pipeline"
       - "Context Packing / Compression Loop"
-      - "Interrupted Tool-Call Repair"
+      - "Dangling Tool-Call Repair"
     failure_modes:
       - lost progress
       - duplicate side effects
@@ -292,8 +292,8 @@ use_cases:
     base_pattern: "MCP and/or A2A Protocol Layer"
     recommended_stack:
       - "Capability discovery"
-      - "MCP Tool/Context Protocol Layer"
-      - "A2A Agent Interoperability Protocol Layer"
+      - "MCP Tool / Context Protocol Layer"
+      - "A2A / Agent Interoperability Protocol Layer"
       - "Auth and policy"
       - "Tracing"
     required_primitives:
@@ -316,6 +316,106 @@ use_cases:
     docs:
       - "../docs/additional-runtime-patterns.md#4-a2a--agent-interoperability-protocol-layer"
       - "../docs/additional-runtime-patterns.md#5-mcp-toolcontext-protocol-layer"
+
+  - id: cost_sensitive_high_volume_agent
+    goal: "Serve high query volume where paying premium-model prices for every request is not affordable."
+    base_pattern: "Model Cascading / Tiered Routing"
+    recommended_stack:
+      - "Model Cascading / Tiered Routing"
+      - "Semantic / Prompt Caching Layer"
+      - "Runtime Budget Policy Engine"
+      - "Run Receipt / Trace-First Runtime"
+    required_primitives:
+      - tiered model registry
+      - confidence/router scoring
+      - cache key strategy
+      - cost accounting
+    optional_patterns:
+      - "Self-Consistency / Sample-and-Vote"
+      - "Token Budget Circuit Breaker"
+    failure_modes:
+      - cost spike
+      - misrouted hard query to weak model
+      - stale cache hit
+    avoid_when:
+      - "Traffic volume is low or every query needs the strongest available model."
+    docs:
+      - "../docs/flow-diagrams.md#44-model-cascading--tiered-routing"
+      - "../docs/decision-guide.md#quick-selection"
+
+  - id: transactional_side_effect_agent
+    goal: "Call multiple external, stateful APIs where partial failure must not leave the world in a broken state."
+    base_pattern: "Saga / Compensating Transaction Loop"
+    recommended_stack:
+      - "Saga / Compensating Transaction Loop"
+      - "Idempotency Key Runtime"
+      - "Run Receipt / Trace-First Runtime"
+    required_primitives:
+      - step log
+      - compensating action per step
+      - idempotency key generation
+      - key/result ledger
+    optional_patterns:
+      - "Task Queue / Resumable Workflow Runtime"
+      - "HITL Interrupt / Approval Gate"
+    failure_modes:
+      - duplicate side effects
+      - partial multi-api failure
+      - uncompensated step
+    avoid_when:
+      - "Side effects are read-only or trivially safe to retry."
+    docs:
+      - "../docs/flow-diagrams.md#45-saga--compensating-transaction-loop"
+      - "../docs/decision-guide.md#quick-selection"
+
+  - id: hard_reasoning_agent
+    goal: "Answer questions or solve problems where a single reasoning pass is unreliable."
+    base_pattern: "Test-Time Compute / Search"
+    recommended_stack:
+      - "Self-Consistency / Sample-and-Vote"
+      - "Language Agent Tree Search (LATS)"
+      - "Verifier / PRM-Guided Step Search"
+      - "Run Receipt / Trace-First Runtime"
+    required_primitives:
+      - sample or search budget
+      - answer/step scoring
+      - vote or search-selection policy
+    optional_patterns:
+      - "Tree of Thoughts"
+      - "Graph of Thoughts"
+    failure_modes:
+      - wrong answer on hard reasoning
+      - runaway sample/branch cost
+    avoid_when:
+      - "The task is easy enough for reliable single-pass reasoning."
+    docs:
+      - "../docs/flow-diagrams.md#41-self-consistency--sample-and-vote"
+      - "../docs/flow-diagrams.md#42-tree-search-with-verifier-lats--prm-guided-step-search"
+      - "../docs/decision-guide.md#quick-selection"
+
+  - id: cross_session_learning_agent
+    goal: "Retain and reuse knowledge or skills across sessions instead of starting fresh each time."
+    base_pattern: "Memory Runtime"
+    recommended_stack:
+      - "MemGPT-Style Memory Paging"
+      - "Episodic Vector-Store Memory Retrieval Loop"
+      - "Skill Library / Lifelong Skill-Acquisition Loop"
+      - "Context Packing / Compression Loop"
+    required_primitives:
+      - persistent memory store
+      - relevance retrieval
+      - memory write policy
+      - eviction or curation policy
+    optional_patterns:
+      - "Context Trust Zones"
+    failure_modes:
+      - stale or wrong memory retrieved
+      - memory/skill library bloat
+    avoid_when:
+      - "The agent is stateless by design or sessions never repeat."
+    docs:
+      - "../docs/flow-diagrams.md#43-memgpt-style-memory-paging"
+      - "../docs/decision-guide.md#quick-selection"
 
 composition_recipes:
   reliable_tool_assistant:
@@ -365,10 +465,10 @@ failure_mode_map:
     add:
       - "Loop Detection Circuit Breaker"
       - "Token Budget Circuit Breaker"
-      - "Ralph / Bounded Retry Loop"
+      - "Ralph Loop"
   fake_completion:
     add:
-      - "Verifier / Goal Loop"
+      - "Codex Goal / Verifier Loop"
       - "Tests"
       - "Typed blocker states"
   stale_plan:
@@ -427,3 +527,21 @@ failure_mode_map:
       - "Artifact Provenance Graph"
       - "Source ledger"
       - "Run Receipt / Trace-First Runtime"
+  cost_spike:
+    add:
+      - "Model Cascading / Tiered Routing"
+      - "Semantic / Prompt Caching Layer"
+      - "Runtime Budget Policy Engine"
+  duplicate_side_effects:
+    add:
+      - "Idempotency Key Runtime"
+      - "Saga / Compensating Transaction Loop"
+  wrong_answer_on_hard_reasoning:
+    add:
+      - "Self-Consistency / Sample-and-Vote"
+      - "Language Agent Tree Search (LATS)"
+      - "Verifier / PRM-Guided Step Search"
+  regression_after_change:
+    add:
+      - "Offline Regression Eval Loop"
+      - "Adversarial Red-Team / Injection-Regression Loop"

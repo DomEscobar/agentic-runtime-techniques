@@ -1571,3 +1571,263 @@ Branch notes:
 
 - Store durable events first; derive active context second.
 - Branching and compaction become replay rules, not destructive rewrites.
+
+## 41. Self-Consistency / Sample-and-Vote
+
+```text
+Prompt
+    |
+    v
++--------------------------+
+| Sample N reasoning paths |
+| (temperature > 0)        |
++--------------------------+
+    |
+    v
++--------------------------+
+| Extract final answer     |
+| from each path           |
++--------------------------+
+    |
+    v
++--------------------------+
+| Majority vote            |
++--------------------------+
+    |
+    v
+Output most-voted answer
+```
+
+Branch notes:
+
+- No branching logic inside a path; the loop is entirely in how many
+  independent samples are drawn and how their answers are compared.
+- Cost scales linearly with N; N is the only tuning knob.
+
+## 42. Tree Search With Verifier (LATS / PRM-Guided Step Search)
+
+```text
+Root state
+    |
+    v
++--------------------------+
+| Select node (UCB)        |<-------------------+
++--------------------------+                     |
+    |                                             |
+    v                                             |
++--------------------------+                      |
+| Expand: LM proposes      |                      |
+| candidate action(s)      |                      |
++--------------------------+                      |
+    |                                             |
+    v                                             |
++--------------------------+                      |
+| Evaluate step            |                      |
+| (self-reflection, PRM,   |                      |
+| or environment feedback) |                      |
++--------------------------+                      |
+    |                                             |
+    v                                             |
++--------------------------+                      |
+| Backpropagate value      |----------------------+
++--------------------------+
+    |
+    v
++--------------------------+
+| Budget exhausted or      |
+| solved?                  |
++--------------------------+
+    | no                          yes
+    +-----------------------+     v
+                             Return best trajectory
+```
+
+Branch notes:
+
+- The same shape covers Language Agent Tree Search (whole-trajectory search
+  with self-reflection) and PRM-guided step search (a trained reward model
+  scores each step instead of self-reflection).
+- Backpropagation feeds back into node selection, distinguishing this from
+  the simpler Tree of Thoughts BFS/DFS loop.
+
+## 43. MemGPT-Style Memory Paging
+
+```text
+Turn begins
+    |
+    v
++--------------------------+
+| Context near limit?      |
++--------------------------+
+    | yes                         no
+    v                             v
++--------------------------+   Continue with
+| Page out low-relevance   |   current context
+| content to external      |
+| archival/recall storage  |
++--------------------------+
+    |
+    v
++--------------------------+
+| Model requests memory?   |
++--------------------------+
+    | yes                         no
+    v                             v
++--------------------------+   Respond with
+| Page in relevant content |   current context
+| via function call        |
++--------------------------+
+    |
+    v
+Continue turn with updated context
+```
+
+Branch notes:
+
+- Paging decisions are issued by the model itself through function calls,
+  mirroring OS virtual-memory paging rather than a fixed summarization rule.
+- Main context is always the smaller, faster tier; archival/recall storage
+  is external and addressed on demand.
+
+## 44. Model Cascading / Tiered Routing
+
+```text
+Query
+    |
+    v
++--------------------------+
+| Cheap/fast model answers |
++--------------------------+
+    |
+    v
++--------------------------+
+| Confidence/router check  |
++--------------------------+
+    | accept                      escalate
+    v                             v
+Return cheap-model answer   +--------------------------+
+                             | Stronger, costlier model |
+                             | answers                  |
+                             +--------------------------+
+                                 |
+                                 v
+                             Return strong-model answer
+```
+
+Branch notes:
+
+- The router/scoring function is the only new component versus calling one
+  model directly; it can be a trained classifier, an Elo-style ranker, or a
+  self-reported confidence score.
+- Escalation is one-directional in the simple case; multi-tier cascades
+  repeat the check at each tier.
+
+## 45. Saga / Compensating Transaction Loop
+
+```text
+Step 1: call external API
+    |
+    v
++--------------------------+
+| Record compensation for  |
+| step 1                   |
++--------------------------+
+    |
+    v
+Step 2: call external API
+    |
+    v
++--------------------------+
+| Record compensation for  |
+| step 2                   |
++--------------------------+
+    |
+    v
+   ...
+    |
+    v
++--------------------------+
+| Any step failed?         |
++--------------------------+
+    | no                          yes
+    v                             v
+All steps committed          +--------------------------+
+                              | Run recorded              |
+                              | compensations in reverse  |
+                              | order                     |
+                              +--------------------------+
+```
+
+Branch notes:
+
+- Every side-effecting step must have a compensating action recorded before
+  moving to the next step, or that step cannot be safely undone.
+- This is a classical distributed-systems pattern applied to multi-tool
+  agent workflows, not an LLM-specific technique.
+
+## 46. Parallel Tool-Call Fan-Out / Join
+
+```text
+Model turn
+    |
+    v
++--------------------------+
+| Emit N independent       |
+| tool calls in one turn   |
++--------------------------+
+    |
+    +-------+-------+-------+
+    v       v       v       v
+ Tool 1  Tool 2  Tool 3  Tool N   (concurrent execution)
+    |       |       |       |
+    +-------+-------+-------+
+    |
+    v
++--------------------------+
+| Join results             |
+| (handle partial failure) |
++--------------------------+
+    |
+    v
+Continue with combined observation
+```
+
+Branch notes:
+
+- Only independent calls should fan out; calls with data dependencies must
+  stay sequential.
+- The join step needs an explicit partial-failure policy: fail the whole
+  turn, or continue with the calls that succeeded.
+
+## 47. Offline Regression Eval Loop
+
+```text
+Code/prompt/model change proposed
+    |
+    v
++--------------------------+
+| Replay golden transcript /|
+| scenario suite            |
++--------------------------+
+    |
+    v
++--------------------------+
+| Score against rubric or   |
+| golden output             |
++--------------------------+
+    |
+    v
++--------------------------+
+| Pass threshold?           |
++--------------------------+
+    | yes                         no
+    v                             v
+Ship / merge change          Block change, report diff
+```
+
+Branch notes:
+
+- The suite is the ceiling on what this loop can catch; untested scenarios
+  can still regress silently.
+- Typically wired into CI as a required check before merge, mirroring the
+  Implement / Review / Merge coding harness loop.

@@ -29,6 +29,10 @@ reliable for its job.
 | Expensive/long autonomous runs | Budget policy engine | warn thresholds, hard stops, checkpoint | bounded single-turn answer |
 | Auditable artifacts/claims | Provenance graph | claim IDs, source IDs, redaction | output is disposable |
 | Durable branchable sessions | Append-only session log | replay, leaf pointer, compaction entries | no resume/branch/audit needed |
+| Cost-sensitive, high-volume traffic | Model cascading / tiered routing | semantic/prompt caching, cost accounting | traffic is low-volume or every call needs the strongest model |
+| Irreversible multi-API side effects | Saga / compensating transaction loop | idempotency keys, step log, reverse-order compensation | side effects are read-only or trivially retryable |
+| Hard reasoning task, correctness-critical | Test-time compute (self-consistency / tree search / PRM search) | sample budget, verifier, backoff to cheaper decoding on easy inputs | task is easy enough for single-pass reasoning |
+| Cross-session learning or personalization | Memory runtime (MemGPT paging / episodic retrieval / skill library) | eviction policy, retrieval cap, skill curation | agent is stateless by design or sessions never repeat |
 
 ## Design From Requirements
 
@@ -353,6 +357,10 @@ Before choosing a pattern, answer these:
 | Hidden production failure | run receipts, tracing, status events |
 | Crash or long wait | task queue, checkpoint, retry/backoff |
 | User cannot audit result | source ledger, artifacts, trace summary |
+| Cost spike from routing every query to the strongest model | model cascading, semantic/prompt caching, budget policy engine |
+| Duplicate side effects from retries or crash recovery | idempotency keys, saga compensation, at-most-once execution wrapper |
+| Wrong answer on hard reasoning despite a plausible-looking chain | self-consistency, tree search with verifier, PRM-guided step search |
+| Regression after a prompt, tool, or model change | offline regression eval loop, adversarial red-team/injection-regression loop |
 
 ## Minimal Viable Runtime
 

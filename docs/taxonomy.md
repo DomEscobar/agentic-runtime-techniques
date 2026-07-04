@@ -247,3 +247,197 @@ Main value:
 Main risk:
 
 - Test gaps and reviewer blind spots still leak defects.
+
+## Cross-Cutting Runtime Layers
+
+Categories 1-10 describe the shape of an agent's reasoning loop. The
+categories below are not reasoning loops themselves; they are runtime layers
+that wrap, gate, extend, or observe any of the loops above. A production
+system usually composes one loop-shape category with several of these
+layers.
+
+### 11. Test-Time Compute / Search Loops
+
+The system spends extra inference compute at run time, sampling or expanding
+multiple candidates and searching for the best one, instead of committing to
+a single pass.
+
+Canonical shape:
+
+```text
+sample/expand candidates -> score or evaluate -> select or backtrack -> repeat until budget exhausted
+```
+
+Examples:
+
+- Self-Consistency / sample-and-vote
+- Tree of Thoughts, Graph of Thoughts
+- Language Agent Tree Search (LATS)
+- Verifier/PRM-guided step search
+
+Main value:
+
+- Trades extra inference compute for higher answer reliability on hard
+  reasoning tasks.
+
+Main risk:
+
+- Cost scales quickly with sample or branch count; needs a hard compute
+  budget.
+
+### 12. Human-in-the-Loop and Governance Loops
+
+Risky or uncertain actions pause for a human decision instead of proceeding
+automatically.
+
+Canonical shape:
+
+```text
+proposed action -> risk policy -> interrupt -> human decision -> resume
+```
+
+Examples:
+
+- HITL Interrupt / Approval Gate
+- Evaluator/Optimizer Loop with HITL fallback
+
+Main value:
+
+- Makes human review a first-class, resumable runtime branch instead of an
+  ad hoc chat aside.
+
+Main risk:
+
+- Approval fatigue and miscalibrated policy thresholds.
+
+### 13. Runtime Security and Access Control
+
+The system decides what an agent is allowed to see, call, or spend,
+independent of how well it reasons.
+
+Canonical shape:
+
+```text
+untrusted input/tool -> trust classification/capability check -> screen or scope -> allow/block/escalate
+```
+
+Examples:
+
+- Prompt-Injection Action Firewall
+- Context Trust Zones
+- Capability / Least-Privilege Runtime
+- Runtime Budget Policy Engine
+
+Main value:
+
+- Bounds agent authority and blast radius even when reasoning fails.
+
+Main risk:
+
+- Over-restriction blocks legitimate work; under-restriction leaves
+  excessive agency.
+
+### 14. Context and Memory Runtime
+
+The system treats context and memory as scarce, managed resources rather
+than an ever-growing transcript.
+
+Canonical shape:
+
+```text
+sources -> rank/filter/pack -> budget check -> summarize or page out -> model -> update memory
+```
+
+Examples:
+
+- Context Packing / Compression Loop
+- MemGPT-style memory paging
+- Episodic vector-store memory retrieval
+- Skill Library / lifelong skill acquisition
+
+Main value:
+
+- Keeps long-running agents within context limits while preserving
+  decisive information across turns and sessions.
+
+Main risk:
+
+- Compression or paging can silently drop what turns out to be the
+  important detail.
+
+### 15. Harness and Composition Runtime
+
+The system separates a reusable "agent brain" from the UI, session, and
+persistence concerns that surround it.
+
+Canonical shape:
+
+```text
+caller/session -> harness (transcript, queues, cancellation) -> stateless loop -> events -> caller/session
+```
+
+Examples:
+
+- Stateful Harness Around Pure Agent Loop
+- DeerFlow-style middleware stack
+- Workflow-graph / state-machine runtime
+
+Main value:
+
+- Lets the same core loop power a CLI, TUI, API, or test harness without
+  rewriting it.
+
+Main risk:
+
+- Ownership boundaries blur if the harness and loop both try to own state.
+
+### 16. Protocol and Interop Layers
+
+Tools and remote agents become portable across frameworks through a shared
+protocol instead of bespoke integrations.
+
+Canonical shape:
+
+```text
+host/client -> capability discovery -> invoke tool/agent -> status/result contract
+```
+
+Examples:
+
+- MCP Tool / Context Protocol Layer
+- A2A Agent Interoperability Protocol Layer
+
+Main value:
+
+- Makes tools and remote agents reusable across frameworks and vendors.
+
+Main risk:
+
+- Protocol plumbing can be mistaken for agent reasoning; host-side
+  authorization is still required.
+
+### 17. Observability and Provenance Loops
+
+The system emits structured records of what happened so runs can be
+debugged, audited, and replayed after the fact.
+
+Canonical shape:
+
+```text
+run -> structured trace/provenance events -> inspect/evaluate/replay/audit
+```
+
+Examples:
+
+- Run Receipt / Trace-First Runtime
+- Artifact Provenance Graph
+- Append-Only Session Event Log / Branchable Replay
+
+Main value:
+
+- Makes agent failures diagnosable and outputs auditable.
+
+Main risk:
+
+- Traces without redaction can leak private context; logs without replay
+  are only half useful.

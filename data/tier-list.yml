@@ -36,6 +36,7 @@ tiers:
         sources:
           - https://arxiv.org/abs/2305.16291
           - https://voyager.minedojo.org/
+        notes: "Cataloged in data/techniques.yml as 'Skill Library / Lifelong Skill-Acquisition Loop', which generalizes Voyager's skill library beyond Minecraft."
       - name: CodeAct
         published: "2024-02"
         area: executable_code_action_loop
@@ -43,6 +44,21 @@ tiers:
         sources:
           - https://arxiv.org/abs/2402.01030
           - https://github.com/xingyaoww/code-act
+        notes: "Cataloged in data/techniques.yml as 'RLM / CodeAct REPL Loop'."
+      - name: Self-Consistency
+        published: "2022-03"
+        area: test_time_compute
+        benchmark_signal: "GSM8K +17.9%, SVAMP +11.0%, AQuA +12.2%, StrategyQA +6.4%, ARC-challenge +3.9% over greedy chain-of-thought decoding."
+        sources:
+          - https://arxiv.org/abs/2203.11171
+        notes: "Cataloged in data/techniques.yml as 'Self-Consistency / Sample-and-Vote'."
+      - name: Language Agent Tree Search (LATS)
+        published: "2023-10"
+        area: test_time_compute
+        benchmark_signal: "State-of-the-art 92.7% pass@1 on HumanEval with GPT-4; gradient-free WebShop performance comparable to fine-tuning."
+        sources:
+          - https://arxiv.org/abs/2310.04406
+          - https://github.com/lapisrocks/LanguageAgentTreeSearch
       - name: SWE-agent / ACI
         published: "2024-05"
         area: coding_harness
@@ -50,6 +66,7 @@ tiers:
         sources:
           - https://arxiv.org/abs/2405.15793
           - https://github.com/swe-agent/swe-agent
+        notes: "Cataloged in data/techniques.yml as 'SWE-agent / Agent-Computer Interface'."
   A:
     meaning: "Good evidence or high runtime relevance, narrower or less directly comparable."
     techniques:
@@ -65,6 +82,7 @@ tiers:
         benchmark_signal: "Zero-shot retrieval gains across web search, QA, fact verification, multilingual tasks."
         sources:
           - https://arxiv.org/abs/2212.10496
+        notes: "Cataloged in data/techniques.yml as 'HyDE (Hypothetical Document Embeddings)'."
       - name: Toolformer
         published: "2023-02"
         area: tool_use_learning
@@ -95,16 +113,37 @@ tiers:
         benchmark_signal: "Dynamic factual QA benchmark; exposes gap between LLMs and trustworthy RAG."
         sources:
           - https://arxiv.org/abs/2406.04744
+        notes: "This is an evaluation benchmark/dataset, not a runtime technique, so it has no matching data/techniques.yml entry. It shares the 'CRAG' acronym with, but is a different paper from, Corrective RAG above."
+      - name: Graph of Thoughts
+        published: "2023-08"
+        area: test_time_compute
+        benchmark_signal: "62% higher sorting quality than Tree of Thoughts while reducing cost by more than 31%."
+        sources:
+          - https://arxiv.org/abs/2308.09687
+          - https://github.com/spcl/graph-of-thoughts
+      - name: Verifier / PRM-Guided Step Search
+        published: "2023-05"
+        area: test_time_compute
+        benchmark_signal: "Process-supervised reward model solves 78% of a representative MATH test subset, outperforming outcome supervision."
+        sources:
+          - https://arxiv.org/abs/2305.20050
+      - name: Model Cascading / Tiered Routing
+        published: "2023-05 / 2024-06"
+        area: cost_runtime
+        benchmark_signal: "FrugalGPT matches best individual LLM with up to 98% cost reduction; RouteLLM reduces cost by over 2x on MMLU/MT-Bench with preserved quality."
+        sources:
+          - https://arxiv.org/abs/2305.05176
+          - https://arxiv.org/abs/2406.18665
   B:
     meaning: "Important but benchmark evidence is indirect, framework-level, or harder to isolate."
     techniques:
-      - name: AutoGen multi-agent conversations
+      - name: AutoGen Multi-Agent Conversations
         published: "2023-08"
         area: multi_agent_orchestration
         benchmark_signal: "Framework/example evidence across domains; less clean isolated benchmark signal."
         sources:
           - https://arxiv.org/abs/2308.08155
-      - name: MetaGPT SOP agents
+      - name: MetaGPT SOP Agents
         published: "2023-08"
         area: multi_agent_sop_workflow
         benchmark_signal: "Collaborative software engineering tasks; framework and SOP effects are coupled."
@@ -124,12 +163,14 @@ tiers:
         sources:
           - https://openai.com/index/new-tools-for-building-agents/
           - https://openai.github.io/openai-agents-python/
+        notes: "Evidence source for the Guardrail Pipeline, Run Receipt / Trace-First Runtime, and HITL Interrupt / Approval Gate entries in data/techniques.yml, not a single standalone technique."
       - name: LangGraph durable execution
         published: "2024+"
         area: durable_orchestration
         benchmark_signal: "Explicit durable execution, persistence, streaming, human-in-the-loop features."
         sources:
           - https://docs.langchain.com/oss/python/langgraph/overview
+        notes: "Evidence source for both 'Task Queue / Resumable Workflow Runtime' and 'Workflow-Graph / State-Machine Runtime' in data/techniques.yml."
       - name: Swarm / Supervisor multi-agent architectures
         published: "2024-10 / 2025-06"
         area: multi_agent_orchestration
@@ -139,24 +180,34 @@ tiers:
           - https://github.com/langchain-ai/langgraph-swarm-py
           - https://reference.langchain.com/python/langgraph-supervisor
           - https://www.langchain.com/blog/benchmarking-multi-agent-architectures
+        notes: "Cataloged as two separate techniques in data/techniques.yml: 'Supervisor Architecture' and 'Swarm Architecture'."
+      - name: MemGPT-Style Memory Paging
+        published: "2023-10"
+        area: memory_runtime
+        benchmark_signal: "Document analysis beyond the base LLM's context window and persona-consistent multi-session chat; evaluated on two focused domains rather than a broad public leaderboard."
+        sources:
+          - https://arxiv.org/abs/2310.08560
   C:
     meaning: "Emerging or useful but currently weak public benchmark evidence."
     techniques:
-      - name: Deep Research-style loops
+      - name: Deep Research Loop
         published: "2025+"
         area: research_loop
         benchmark_signal: "Product-level evidence; reproducible public benchmark details vary."
         sources:
           - https://openai.com/index/introducing-deep-research/
+        notes: "Same technique as the Deep Research Loop entry in data/techniques.yml. Previously listed here as 'Deep Research-style loops'; renamed to remove the duplicate name."
       - name: Onyx programs / heartbeat checkpoint loop
         published: "2026-07"
         area: programmable_agent_runtime
         benchmark_signal: "Strong conceptual runtime primitives; no established public benchmark yet."
         sources:
           - https://x.com/i/article/2073112080140689408
-      - name: Dynamic workflow generation
+        notes: "Cataloged in data/techniques.yml as 'Heartbeat / Checkpoint Loop', which this article's run/spawn/typed-state framing extends."
+      - name: Dynamic Workflow Generation
         published: "2026"
         area: per_task_harness_synthesis
         benchmark_signal: "Product/demo-level evidence so far."
         sources:
           - https://www.anthropic.com/news/claude-opus-4-8
+        notes: "Cataloged in data/techniques.yml as 'Dynamic Workflow Generation'."

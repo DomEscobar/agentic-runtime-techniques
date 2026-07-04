@@ -32,7 +32,13 @@ techniques:
     tradeoffs:
       - stale plans
       - planner/executor mismatch
-    sources: []
+    sources:
+      - title: "Plan-and-Solve Prompting: Improving Zero-Shot Chain-of-Thought Reasoning by Large Language Models"
+        url: "https://arxiv.org/abs/2305.04091"
+        type: paper
+      - title: "Plan-and-Execute Agents"
+        url: "https://www.langchain.com/blog/planning-agents"
+        type: article
 
   - name: ReWOO
     category: planning_loop
@@ -171,10 +177,10 @@ techniques:
       - metric design is critical
       - exploration can get narrow
     sources:
-      - title: "Autoresearch"
-        url: "https://github.com/karpathy/llm.c/discussions"
-        type: placeholder
-    notes: "Replace placeholder with the canonical source once identified."
+      - title: "karpathy/autoresearch"
+        url: "https://github.com/karpathy/autoresearch"
+        type: code
+    notes: "Placeholder source replaced. Karpathy's autoresearch is an autonomous ML experiment loop: an agent reads a human-written program.md, proposes one change to train.py, commits to a git branch, runs a fixed-duration training job, and keeps the commit (git commit) or reverts it (git reset) based on whether the target metric improved."
 
   - name: Planner / Executor Harness
     category: multi_agent_loop
@@ -193,7 +199,14 @@ techniques:
     tradeoffs:
       - coordination overhead
       - task boundaries can be wrong
-    sources: []
+    sources:
+      - title: "MetaGPT: Meta Programming for a Multi-Agent Collaborative Framework"
+        url: "https://arxiv.org/abs/2308.00352"
+        type: paper
+      - title: "Awesome Agent Orchestrators"
+        url: "https://github.com/andyrewlee/awesome-agent-orchestrators"
+        type: code
+    notes: "See the MetaGPT SOP Agents entry for a fully-worked example of this harness with fixed roles."
 
   - name: Heartbeat / Checkpoint Loop
     category: durable_runtime_loop
@@ -233,7 +246,13 @@ techniques:
     tradeoffs:
       - weak tests weaken the loop
       - reviewer can share blind spots with implementer
-    sources: []
+    sources:
+      - title: "SWE-bench"
+        url: "https://www.swebench.com/"
+        type: benchmark
+      - title: "SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering"
+        url: "https://arxiv.org/abs/2405.15793"
+        type: paper
 
   - name: Blackboard / Shared Workspace Coordination
     category: multi_agent_coordination
@@ -618,3 +637,839 @@ techniques:
       - title: "Tau session primitives"
         url: "https://github.com/huggingface/tau/tree/main/src/tau_agent/session"
         type: code
+
+  - name: Supervisor Architecture
+    category: multi_agent_orchestration
+    summary: A central supervisor agent receives user input, delegates to worker agents, and produces or forwards the final user-facing response.
+    loop_shape: user -> supervisor -> worker -> supervisor -> user
+    runtime_primitives:
+      - supervisor agent
+      - worker/subagent registry
+      - delegation or handoff tools
+      - result return channel
+      - optional forward_message tool
+      - delegation ledger
+      - continuation limits
+    solves:
+      - central governance over multi-agent work
+      - auditable delegation to black-box or third-party workers
+    tradeoffs:
+      - translation loss when the supervisor paraphrases worker output
+      - coordinator bottleneck and higher token cost
+      - delegation loops need explicit breakers
+    sources:
+      - title: "OpenAI Swarm"
+        url: "https://github.com/openai/swarm"
+        type: code
+      - title: "LangGraph Supervisor reference"
+        url: "https://reference.langchain.com/python/langgraph-supervisor"
+        type: docs
+      - title: "Benchmarking Multi-Agent Architectures"
+        url: "https://www.langchain.com/blog/benchmarking-multi-agent-architectures"
+        type: article
+    notes: "See docs/supervisor-swarm-techniques.md for the full supervisor-vs-swarm comparison."
+
+  - name: Swarm Architecture
+    category: multi_agent_orchestration
+    summary: Agents hand off control directly to one another based on specialization; the active agent can respond to the user without routing through a central coordinator.
+    loop_shape: user -> active agent -> handoff -> next active agent -> user
+    runtime_primitives:
+      - active agent state
+      - agent-to-agent handoff tools
+      - context variables passed between agents
+      - last-active-agent memory
+      - max turns
+    solves:
+      - low-overhead specialist routing
+      - direct responses without supervisor paraphrase loss
+    tradeoffs:
+      - weaker central coordination
+      - agents may need awareness of peer capabilities
+      - handoff loops need turn limits and observability
+    sources:
+      - title: "OpenAI Swarm"
+        url: "https://github.com/openai/swarm"
+        type: code
+      - title: "LangGraph Swarm"
+        url: "https://github.com/langchain-ai/langgraph-swarm-py"
+        type: code
+    notes: "See docs/supervisor-swarm-techniques.md for the full supervisor-vs-swarm comparison."
+
+  - name: Hierarchical Supervisor Tree
+    category: multi_agent_orchestration
+    summary: A root supervisor delegates to domain supervisors, which delegate to leaf agents, aggregating results back up the tree to the root.
+    loop_shape: root supervisor -> domain supervisor -> leaf agents -> domain supervisor -> root supervisor -> user
+    runtime_primitives:
+      - multi-level supervisor tree
+      - per-level delegation limits
+      - result aggregation
+      - explicit ownership boundaries
+    solves:
+      - scaling supervision across domains too large for one supervisor
+    tradeoffs:
+      - added coordination cost at each tree level
+      - more places for information loss between levels
+    sources:
+      - title: "CrewAI hierarchical process"
+        url: "https://docs.crewai.com/v1.15.0/en/concepts/processes"
+        type: docs
+
+  - name: Context Trust Zones
+    category: runtime_security
+    summary: The runtime tracks where each piece of context came from and how much authority it has, so untrusted content stays evidence rather than instruction.
+    loop_shape: context source -> trust-zone classification -> packing/policy -> model/tool boundary
+    runtime_primitives:
+      - source labels
+      - trust-zone metadata
+      - context packing rules
+      - quote/evidence boundaries
+      - provenance links
+    solves:
+      - instruction/data confusion
+      - summary laundering of malicious source text
+      - unsafe memory updates from untrusted content
+    tradeoffs:
+      - requires consistent trust labeling across every context source
+      - adds packing-policy complexity
+    sources:
+      - title: "OWASP LLM01 Prompt Injection"
+        url: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+        type: guide
+      - title: "OWASP LLM Prompt Injection Prevention Cheat Sheet"
+        url: "https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html"
+        type: guide
+
+  - name: Least-to-Most Prompting
+    category: query_decomposition
+    summary: A hard problem is decomposed into an ordered sequence of simpler subproblems, each solved using the answers to the previous subproblems.
+    loop_shape: decompose into subproblems -> solve subproblem using prior answers -> repeat until final subproblem solved
+    runtime_primitives:
+      - decomposition step
+      - ordered subproblem list
+      - sequential answer chaining
+    solves:
+      - compositional generalization on hard multi-step reasoning
+      - tasks harder than any single few-shot example
+    tradeoffs:
+      - decomposition quality bounds final accuracy
+      - subproblem ordering must respect real dependencies
+    sources:
+      - title: "Least-to-Most Prompting Enables Complex Reasoning in Large Language Models"
+        url: "https://arxiv.org/abs/2205.10625"
+        type: paper
+
+  - name: Tree of Thoughts
+    category: test_time_compute
+    summary: The model explores multiple reasoning branches as a tree, evaluates intermediate thoughts, and searches toward a solution instead of committing to one linear chain.
+    loop_shape: generate candidate thoughts -> evaluate/score thoughts -> expand best branches or backtrack -> repeat until solved or budget exhausted
+    runtime_primitives:
+      - thought generator
+      - state evaluator
+      - search strategy (BFS/DFS)
+      - backtracking
+      - branch budget
+    solves:
+      - problems needing exploration or lookahead that one reasoning chain cannot recover from
+    tradeoffs:
+      - multiplies token/latency cost by branching factor
+      - needs a hard search budget
+    sources:
+      - title: "Tree of Thoughts: Deliberate Problem Solving with Large Language Models"
+        url: "https://arxiv.org/abs/2305.10601"
+        type: paper
+      - title: "tree-of-thought-llm"
+        url: "https://github.com/princeton-nlp/tree-of-thought-llm"
+        type: code
+
+  - name: Self-Ask with Search
+    category: query_analysis
+    summary: The model decides whether a question needs decomposition, explicitly asks itself follow-up questions, and can route each follow-up to a search tool before composing the final answer.
+    loop_shape: question -> need follow-up? -> ask follow-up -> search/answer follow-up -> repeat -> final answer
+    runtime_primitives:
+      - follow-up decision
+      - follow-up question generation
+      - search routing
+      - intermediate answer tracking
+    solves:
+      - compositional QA requiring explicit decomposition before retrieval
+    tradeoffs:
+      - extra follow-up turns cost latency
+      - follow-up question quality gates final accuracy
+    sources:
+      - title: "Measuring and Narrowing the Compositionality Gap in Language Models"
+        url: "https://arxiv.org/abs/2210.03350"
+        type: paper
+      - title: "self-ask"
+        url: "https://github.com/ofirpress/self-ask"
+        type: code
+
+  - name: HyDE (Hypothetical Document Embeddings)
+    category: context_acquisition
+    summary: The model first generates a hypothetical answer document, embeds it, and uses that embedding to retrieve real documents that are semantically closer to the answer than the raw query would be.
+    loop_shape: query -> generate hypothetical document -> embed hypothetical document -> retrieve nearest real documents -> answer
+    runtime_primitives:
+      - hypothetical-document generator
+      - embedding model
+      - vector retrieval
+    solves:
+      - zero-shot dense retrieval when the query and answer live in different semantic spaces
+    tradeoffs:
+      - hallucinated hypothetical content can bias retrieval
+      - adds one generation step before retrieval
+    sources:
+      - title: "Precise Zero-Shot Dense Retrieval without Relevance Labels"
+        url: "https://arxiv.org/abs/2212.10496"
+        type: paper
+      - title: "hyde"
+        url: "https://github.com/texttron/hyde"
+        type: code
+
+  - name: Toolformer
+    category: tool_use_learning
+    summary: The model learns, in a self-supervised way, when and how to call external APIs by inserting API calls into its own training text and keeping only calls that improve next-token prediction.
+    loop_shape: sample candidate API calls -> execute -> keep call if it improves prediction -> fine-tune on filtered examples
+    runtime_primitives:
+      - candidate API call sampling
+      - API execution
+      - filtering by prediction improvement
+      - self-supervised fine-tuning data
+    solves:
+      - teaching a model tool-use timing without hand-labeled tool-use examples
+    tradeoffs:
+      - a training-time technique, not an adaptive runtime control loop
+      - tool-use behavior is fixed at fine-tuning time
+    sources:
+      - title: "Toolformer: Language Models Can Teach Themselves to Use Tools"
+        url: "https://arxiv.org/abs/2302.04761"
+        type: paper
+
+  - name: Self-RAG
+    category: adaptive_retrieval
+    summary: The model learns to decide when to retrieve, retrieves on demand, and critiques its own generations and retrieved passages using special reflection tokens.
+    loop_shape: decide retrieve? -> retrieve if needed -> generate segment -> self-critique relevance/support/usefulness -> continue or revise
+    runtime_primitives:
+      - retrieval-decision token
+      - retrieved-passage critique
+      - generation critique
+      - reflection tokens
+    solves:
+      - unnecessary or low-quality retrieval
+      - weak factuality and citation support
+    tradeoffs:
+      - requires special training for reflection tokens
+      - critique quality bounds correction quality
+    sources:
+      - title: "Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection"
+        url: "https://arxiv.org/abs/2310.11511"
+        type: paper
+      - title: "Self-RAG project page"
+        url: "https://selfrag.github.io/"
+        type: article
+
+  - name: Corrective RAG
+    category: retrieval_correction_loop
+    summary: A lightweight retrieval evaluator grades retrieved documents as correct, ambiguous, or incorrect, then triggers web search or knowledge refinement to correct weak retrieval before generation.
+    loop_shape: retrieve -> grade retrieval quality -> correct/refine or supplement with web search -> generate
+    runtime_primitives:
+      - retrieval evaluator
+      - correction/refinement action
+      - web-search fallback
+      - knowledge refinement
+    solves:
+      - bad or irrelevant retrieval propagating into generation
+    tradeoffs:
+      - the evaluator becomes a new failure point
+      - added latency for the correction step
+    sources:
+      - title: "Corrective Retrieval Augmented Generation"
+        url: "https://arxiv.org/abs/2401.15884"
+        type: paper
+
+  - name: SWE-agent / Agent-Computer Interface
+    category: coding_harness_loop
+    summary: A purpose-built agent-computer interface (custom commands for search, view, and edit) replaces raw shell access, measurably improving coding agent success independent of the underlying model.
+    loop_shape: ACI command -> structured environment feedback -> next ACI command -> ... -> submit patch
+    runtime_primitives:
+      - custom search/view/edit commands
+      - structured environment feedback
+      - patch submission
+      - sandboxed execution
+    solves:
+      - poor tool ergonomics limiting coding agent performance
+    tradeoffs:
+      - interface design itself becomes a tuning surface
+      - benchmark results are coupled to the model-and-interface pair
+    sources:
+      - title: "SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering"
+        url: "https://arxiv.org/abs/2405.15793"
+        type: paper
+      - title: "swe-agent"
+        url: "https://github.com/swe-agent/swe-agent"
+        type: code
+
+  - name: AutoGen Multi-Agent Conversations
+    category: multi_agent_framework
+    summary: Agents are defined as conversable entities that exchange messages under configurable conversation patterns (two-agent chat, group chat, nested chats) to complete tasks.
+    loop_shape: define conversable agents -> configure conversation pattern -> agents exchange messages -> termination condition -> result
+    runtime_primitives:
+      - conversable agent abstraction
+      - conversation pattern configuration
+      - group chat manager
+      - termination condition
+      - human-input modes
+    solves:
+      - flexible multi-agent conversation patterns without hardcoding one topology
+    tradeoffs:
+      - benchmark signal is diffuse because it is a general infrastructure layer, not one measured technique
+    sources:
+      - title: "AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation"
+        url: "https://arxiv.org/abs/2308.08155"
+        type: paper
+      - title: "AutoGen docs"
+        url: "https://microsoft.github.io/autogen/0.2/docs/Use-Cases/agent_chat/"
+        type: docs
+
+  - name: MetaGPT SOP Agents
+    category: multi_agent_workflow
+    summary: Agents are assigned software-engineering roles (PM, architect, engineer, QA) and communicate through standardized operating procedures and structured artifacts instead of free-form chat.
+    loop_shape: role assignment -> SOP-defined artifact handoff (PRD -> design -> code -> tests) -> review -> next role
+    runtime_primitives:
+      - role definitions
+      - SOP artifact schemas
+      - structured handoff documents
+      - review gates
+    solves:
+      - miscommunication in multi-agent software generation via standardized artifacts
+    tradeoffs:
+      - harder to isolate the SOP benefit from underlying model capability
+      - rigid SOPs can be a poor fit for atypical tasks
+    sources:
+      - title: "MetaGPT: Meta Programming for a Multi-Agent Collaborative Framework"
+        url: "https://arxiv.org/abs/2308.00352"
+        type: paper
+
+  - name: Intent / Context / Routing Front Door
+    category: query_routing
+    summary: Incoming requests are analyzed for task type and risk, optionally enriched with retrieved context, then routed to a direct answer, tool loop, workflow, or clarification path.
+    loop_shape: intent analysis -> need more context? -> retrieve/shape context -> route to answer/tool/workflow/clarify
+    runtime_primitives:
+      - intent classifier
+      - risk/SLA tagging
+      - context retrieval trigger
+      - context shaping
+      - route dispatcher
+    solves:
+      - unnecessary agent loops for simple requests
+      - matching task type to the right runtime pattern
+    tradeoffs:
+      - misclassification routes tasks to the wrong pattern
+      - adds a decision step before every request
+    sources: []
+    notes: "Intent should be classified by a model call or trained classifier, not hardcoded keyword matching, since real user intent is open-ended. No single canonical primary source identified yet; extracted from this repo's own flow-diagram and decision-guide analysis."
+
+  - name: Plan-Mode Todo Loop
+    category: planning_loop
+    summary: The agent maintains an explicit todo list with exactly one item in progress at a time, giving visible progress tracking without a separate planner role.
+    loop_shape: write todos -> mark one in progress -> execute -> mark complete -> next todo
+    runtime_primitives:
+      - todo list state
+      - single-in-progress discipline
+      - write_todos tool
+      - completion tracking
+    solves:
+      - visible progress on multi-step tasks without full planner/executor overhead
+    tradeoffs:
+      - todos can go stale if not revisited
+      - does not replace a real replanning trigger
+    sources:
+      - title: "DeerFlow technique notes"
+        url: "docs/deer-flow-techniques.md"
+        type: local
+
+  - name: Steering and Follow-Up Queues
+    category: harness_runtime
+    summary: A running agent accepts queued user messages, injecting steering input at the next safe turn/tool boundary and follow-up input only when the agent would otherwise stop.
+    loop_shape: agent running -> user sends message -> queue as steering or follow-up -> drain at safe boundary -> continue loop
+    runtime_primitives:
+      - steering queue
+      - follow-up queue
+      - queue drain callback
+      - single-runner invariant
+    solves:
+      - letting a user influence or queue instructions for an active run without racing the transcript
+    tradeoffs:
+      - queue semantics need clear UX so users understand steer vs. follow-up
+    sources:
+      - title: "Tau AgentHarness"
+        url: "https://github.com/huggingface/tau/blob/main/src/tau_agent/harness.py"
+        type: code
+
+  - name: Evaluator / Optimizer Loop
+    category: verification_loop
+    summary: A draft is scored by a separate evaluator prompt against a rubric; failing drafts go through a targeted optimizer rewrite instead of a full regeneration, bounded by a loop budget.
+    loop_shape: draft -> trigger present? -> separate evaluator -> passed? -> output or optimizer rewrite -> re-evaluate
+    runtime_primitives:
+      - rubric
+      - separate evaluator prompt
+      - trigger condition
+      - optimizer rewrite
+      - loop budget
+    solves:
+      - self-preference bias from letting a model judge its own output
+      - wasted full-rewrites on minor issues
+    tradeoffs:
+      - only helps when a trigger reliably fires
+      - adds latency for every evaluated draft
+    sources:
+      - title: "OpenClaw/Hermes technique notes"
+        url: "docs/openclaw-hermes-techniques.md"
+        type: local
+
+  - name: Loop Detection Circuit Breaker
+    category: bounded_retry_loop
+    summary: The runtime hashes tool calls and salient arguments, warns after a repeat threshold, and strips tool calls to force a final answer at a hard limit.
+    loop_shape: hash tool call -> repeated? -> below warn continue, warn threshold inject warning, hard limit strip tools and force final answer
+    runtime_primitives:
+      - call hashing
+      - repeat counter
+      - warn threshold
+      - hard limit
+      - tool-call stripping
+    solves:
+      - infinite or near-infinite repeated tool-call loops
+    tradeoffs:
+      - hashing must tolerate near-duplicate calls without over- or under-triggering
+    sources:
+      - title: "DeerFlow technique notes"
+        url: "docs/deer-flow-techniques.md"
+        type: local
+
+  - name: Token Budget Circuit Breaker
+    category: budget_enforcement
+    summary: The runtime sums input/output/total token usage per run, warns near a threshold, and hard-stops by stripping tools and forcing a final answer at the limit.
+    loop_shape: sum run tokens -> under warn continue, near limit inject warning, hard stop strip tools and finalize
+    runtime_primitives:
+      - token accounting
+      - warn threshold
+      - hard-stop action
+      - subagent token attribution
+    solves:
+      - runaway token consumption and hidden cost spikes within a single run
+    tradeoffs:
+      - a hard stop can cut off useful work mid-task without a summary/resume path
+    sources:
+      - title: "DeerFlow technique notes"
+        url: "docs/deer-flow-techniques.md"
+        type: local
+
+  - name: Deferred Tool Discovery
+    category: tool_runtime
+    summary: Large tool catalogs stay hidden behind a tool_search call; matching schemas are promoted into the active tool list only when the agent searches for them, scoped by a catalog hash.
+    loop_shape: agent sees deferred tool names -> needs hidden tool? -> tool_search(query) -> promote matched schema -> tool becomes callable
+    runtime_primitives:
+      - deferred tool catalog
+      - tool_search tool
+      - catalog-hash scoping
+      - schema promotion
+    solves:
+      - huge MCP/tool catalogs overflowing model context
+    tradeoffs:
+      - catalog-hash scoping must be correct or stale tool names can leak drifted tools
+    sources:
+      - title: "DeerFlow technique notes"
+        url: "docs/deer-flow-techniques.md"
+        type: local
+
+  - name: Read-Before-Write File Gate
+    category: coding_harness_loop
+    summary: Write or edit tools are blocked on an existing file unless the agent holds a current read mark for that file's content, preventing stale or append-only edits.
+    loop_shape: write/edit call -> file exists? -> has current read mark? -> allow write and invalidate mark, or block with error
+    runtime_primitives:
+      - read mark
+      - content-hash tie to read mark
+      - write gate
+      - per-scope lock
+    solves:
+      - duplicated content from repeated appends
+      - edits against stale file versions
+    tradeoffs:
+      - requires every edit path to go through the same gate to be effective
+    sources:
+      - title: "DeerFlow technique notes"
+        url: "docs/deer-flow-techniques.md"
+        type: local
+
+  - name: Dangling Tool-Call Repair
+    category: tool_runtime
+    summary: Before the next model call, the runtime scans for assistant tool calls with no matching tool result and inserts a synthetic failed result so the transcript stays valid for strict providers.
+    loop_shape: scan history for tool_calls -> matching results exist? -> leave unchanged, or insert synthetic error result
+    runtime_primitives:
+      - tool-call scan
+      - synthetic error tool result
+      - pre-request repair step
+    solves:
+      - malformed transcripts after cancellation, interruption, or partial provider output
+    tradeoffs:
+      - repair must run consistently before every provider request, including after resume
+    sources:
+      - title: "Tau AgentHarness"
+        url: "https://github.com/huggingface/tau/blob/main/src/tau_agent/harness.py"
+        type: code
+
+  - name: Subagent Task Tool With Status Contract
+    category: multi_agent_loop
+    summary: A lead agent delegates to typed subagents through a task tool that starts a background run and exposes started/running/completed/failed/cancelled/timed_out status for polling.
+    loop_shape: task(description, prompt, subagent) -> validate type/permissions -> start background run -> poll status -> return result or structured error
+    runtime_primitives:
+      - typed subagent registry
+      - background run handle
+      - status contract
+      - token/trace attribution
+    solves:
+      - fan-out to specialized subagents with observable lifecycle instead of opaque black-box calls
+    tradeoffs:
+      - the status contract must be honest or callers cannot distinguish stuck from working
+    sources:
+      - title: "DeerFlow technique notes"
+        url: "docs/deer-flow-techniques.md"
+        type: local
+
+  - name: Heartbeat Structured Checkpoint Response
+    category: durable_runtime_loop
+    summary: Each heartbeat wakeup returns a structured outcome (no_change, progress, done, blocked, needs_attention) instead of free text, making the durable loop operable.
+    loop_shape: heartbeat wake -> do work or check -> emit structured outcome -> notify if worth interrupting -> sleep
+    runtime_primitives:
+      - structured outcome enum
+      - notify flag
+      - priority
+      - next-check hint
+    solves:
+      - heartbeat loops producing rote chatter instead of actionable status
+    tradeoffs:
+      - the outcome taxonomy must stay small enough to remain meaningful
+    sources:
+      - title: "OpenClaw/Hermes technique notes"
+        url: "docs/openclaw-hermes-techniques.md"
+        type: local
+
+  - name: Self-Consistency / Sample-and-Vote
+    category: test_time_compute
+    summary: Instead of greedy decoding, the model samples multiple diverse reasoning paths for the same prompt and selects the final answer by majority vote across paths.
+    loop_shape: sample N reasoning paths -> extract final answer from each -> majority vote -> output
+    runtime_primitives:
+      - temperature-based sampling
+      - answer extraction
+      - vote aggregation
+      - sample budget N
+    solves:
+      - unreliable single-path reasoning on arithmetic, commonsense, and symbolic tasks
+    tradeoffs:
+      - cost scales linearly with sample count N
+      - only applicable to tasks with a comparable/votable final answer
+    sources:
+      - title: "Self-Consistency Improves Chain of Thought Reasoning in Language Models"
+        url: "https://arxiv.org/abs/2203.11171"
+        type: paper
+
+  - name: Language Agent Tree Search (LATS)
+    category: test_time_compute
+    summary: Combines Monte Carlo Tree Search with LM-generated actions, self-reflection, and external environment feedback to search over reasoning-and-acting trajectories rather than committing to one path.
+    loop_shape: select node (UCB) -> expand with LM actions -> evaluate via self-reflection/environment -> backpropagate value -> repeat until budget exhausted
+    runtime_primitives:
+      - search tree
+      - UCB selection
+      - LM value function
+      - self-reflection
+      - environment feedback
+      - backpropagation
+    solves:
+      - decision-making tasks needing lookahead and correction beyond single-pass ReAct
+    tradeoffs:
+      - 5-20x more LLM calls than simple ReAct
+      - needs an environment that can give feedback
+    sources:
+      - title: "Language Agent Tree Search Unifies Reasoning, Acting, and Planning in Language Models"
+        url: "https://arxiv.org/abs/2310.04406"
+        type: paper
+      - title: "LanguageAgentTreeSearch"
+        url: "https://github.com/lapisrocks/LanguageAgentTreeSearch"
+        type: code
+
+  - name: Graph of Thoughts
+    category: test_time_compute
+    summary: Model-generated thoughts are modeled as vertices in an arbitrary graph with edges as dependencies, enabling aggregation, feedback loops, and merging of multiple reasoning branches beyond a strict tree.
+    loop_shape: generate thought nodes -> connect via transformations (aggregate/refine/generate) -> score nodes -> select best node or continue transforming
+    runtime_primitives:
+      - thought graph
+      - transformation operations
+      - node scoring
+      - graph controller
+    solves:
+      - tasks that benefit from merging or looping over partial results rather than a single linear or tree-shaped chain
+    tradeoffs:
+      - graph controller design is task-specific
+      - more complex to implement than Tree of Thoughts
+    sources:
+      - title: "Graph of Thoughts: Solving Elaborate Problems with Large Language Models"
+        url: "https://arxiv.org/abs/2308.09687"
+        type: paper
+      - title: "graph-of-thoughts"
+        url: "https://github.com/spcl/graph-of-thoughts"
+        type: code
+
+  - name: Verifier / PRM-Guided Step Search
+    category: test_time_compute
+    summary: A process-supervised reward model scores each intermediate reasoning step rather than only the final answer, and the runtime uses those step scores to guide or prune search.
+    loop_shape: generate candidate steps -> score each step with PRM -> keep/expand high-scoring steps -> continue to final answer
+    runtime_primitives:
+      - process reward model
+      - step-level scoring
+      - search/pruning policy
+    solves:
+      - reward hacking and error accumulation from outcome-only verification on long reasoning chains
+    tradeoffs:
+      - requires a trained step-level reward model, which is expensive to build and can itself be miscalibrated
+    sources:
+      - title: "Let's Verify Step by Step"
+        url: "https://arxiv.org/abs/2305.20050"
+        type: paper
+    notes: "Distinct from the Codex Goal / Verifier Loop entry: that loop verifies final outcomes, this technique scores intermediate reasoning steps to guide search."
+
+  - name: MemGPT-Style Memory Paging
+    category: memory_runtime
+    summary: An OS-inspired virtual context manager pages information between a limited main context window and external archival/recall storage, letting the model manage its own memory through function calls.
+    loop_shape: context near limit -> page out low-relevance content to external storage -> page in relevant external content on demand -> continue
+    runtime_primitives:
+      - main context tier
+      - external archival/recall storage
+      - page-in/page-out function calls
+      - self-editing memory
+    solves:
+      - conversations and documents that exceed the model's fixed context window
+    tradeoffs:
+      - paging decisions are model-driven and can misjudge relevance
+      - adds function-call overhead
+    sources:
+      - title: "MemGPT: Towards LLMs as Operating Systems"
+        url: "https://arxiv.org/abs/2310.08560"
+        type: paper
+
+  - name: Episodic Vector-Store Memory Retrieval Loop
+    category: memory_runtime
+    summary: Past interactions or facts are embedded and stored in a vector store; the runtime retrieves the most relevant memories by similarity before each turn and can write new memories after.
+    loop_shape: turn starts -> embed query -> retrieve top-k similar memories -> inject into context -> turn ends -> embed and store new memory
+    runtime_primitives:
+      - embedding model
+      - vector store
+      - similarity retrieval
+      - memory write policy
+    solves:
+      - long-term recall across sessions without keeping full history in context
+    tradeoffs:
+      - similarity retrieval can miss relevant memories that are not lexically/semantically close
+      - stale memories accumulate without an eviction policy
+    sources: []
+    notes: "Widely implemented across memory frameworks; no single canonical primary paper identified yet. Contrast with MemGPT-style paging, which manages a hierarchy of storage tiers rather than a flat similarity index."
+
+  - name: Skill Library / Lifelong Skill-Acquisition Loop
+    category: reflection_loop
+    summary: The agent turns successful task solutions into reusable, named skills (executable code or procedural patterns) stored in a growing library, and retrieves relevant skills before attempting new tasks.
+    loop_shape: attempt task -> succeeds? -> propose skill -> verify -> add to library -> retrieve relevant skills on future tasks
+    runtime_primitives:
+      - skill proposal
+      - skill verification
+      - skill library storage
+      - relevance retrieval
+      - retrieval cap
+    solves:
+      - repeating the same discovery work across tasks or sessions
+    tradeoffs:
+      - the library can accumulate low-quality or narrow skills without curation
+      - retrieval must stay selective to avoid context bloat
+    sources:
+      - title: "Voyager: An Open-Ended Embodied Agent with Large Language Models"
+        url: "https://arxiv.org/abs/2305.16291"
+        type: paper
+      - title: "Voyager project"
+        url: "https://voyager.minedojo.org/"
+        type: article
+    notes: "Generalizes Voyager's skill library beyond Minecraft. OpenClaw's Skill Workshop and DeerFlow's skill activation (docs/openclaw-hermes-techniques.md, docs/deer-flow-techniques.md) are production instances of the same pattern without a formal public benchmark."
+
+  - name: Model Cascading / Tiered Routing
+    category: cost_runtime
+    summary: Queries are sent to a cheap/fast model first; a scoring function or router decides whether to accept that answer or escalate to a stronger, more expensive model.
+    loop_shape: query -> cheap model answers -> confidence/router check -> accept, or escalate to stronger model
+    runtime_primitives:
+      - tiered model registry
+      - confidence/router scoring
+      - escalation policy
+      - cost accounting
+    solves:
+      - paying premium-model prices for queries a cheap model could have answered
+    tradeoffs:
+      - router misclassification sends hard queries to the weak model or easy queries to the expensive one
+    sources:
+      - title: "FrugalGPT: How to Use Large Language Models While Reducing Cost and Improving Performance"
+        url: "https://arxiv.org/abs/2305.05176"
+        type: paper
+      - title: "RouteLLM: Learning to Route LLMs with Preference Data"
+        url: "https://arxiv.org/abs/2406.18665"
+        type: paper
+
+  - name: Semantic / Prompt Caching Layer
+    category: cost_runtime
+    summary: The runtime caches model responses or prefix-stable prompt segments so repeated or semantically similar requests skip redundant inference.
+    loop_shape: request -> cache lookup (exact or semantic match) -> hit return cached response, miss call model and store result
+    runtime_primitives:
+      - cache key strategy (exact/prefix/semantic)
+      - cache store
+      - invalidation policy
+      - prefix-stable prompt layout
+    solves:
+      - redundant inference cost and latency on repeated or near-duplicate requests
+    tradeoffs:
+      - semantic cache hits can return stale or subtly wrong answers if the similarity threshold is too loose
+    sources: []
+    notes: "Provider-specific prefix-caching docs exist per vendor; no single canonical cross-provider primary source identified yet. Related to the prefix-cache-friendly dynamic context pattern in docs/deer-flow-techniques.md."
+
+  - name: Saga / Compensating Transaction Loop
+    category: transactional_runtime
+    summary: A multi-step task that calls several external, stateful APIs records a compensating action for each completed step, so a failure partway through triggers reverse-order compensation instead of leaving partial side effects.
+    loop_shape: step 1 -> record compensation -> step 2 -> record compensation -> ... -> failure? -> run compensations in reverse order
+    runtime_primitives:
+      - step log
+      - compensating action per step
+      - reverse-order execution
+      - saga completion record
+    solves:
+      - partial side effects from multi-API agent workflows that fail midway
+    tradeoffs:
+      - every side-effecting step needs a defined compensating action, which is not always possible
+    sources: []
+    notes: "Classical distributed-systems pattern (saga), applied to agent tool orchestration; no single canonical agent-runtime primary source identified yet."
+
+  - name: Idempotency Key Runtime
+    category: transactional_runtime
+    summary: Each side-effecting action is tagged with an idempotency key so retries, resumes, or duplicate deliveries execute the action at most once.
+    loop_shape: action requested -> idempotency key exists in ledger? -> yes return prior result, no execute and record key and result
+    runtime_primitives:
+      - idempotency key generation
+      - key/result ledger
+      - retry-safe execution wrapper
+    solves:
+      - duplicate side effects from task-queue retries or crash recovery
+    tradeoffs:
+      - requires every external API to support or tolerate idempotency keys
+    sources: []
+    notes: "Standard distributed-systems primitive, promoted here from a tradeoff bullet under Task Queue / Resumable Workflow Runtime because production agents that call paid or stateful APIs need it as a first-class control."
+
+  - name: Offline Regression Eval Loop
+    category: evaluation_runtime
+    summary: A suite of golden transcripts or scenarios is replayed against the agent after every change, and outcomes are scored automatically to catch behavior regressions before deployment.
+    loop_shape: change made -> replay eval suite -> score against golden/rubric -> pass/fail gate -> ship or block
+    runtime_primitives:
+      - golden transcript/scenario suite
+      - automated scorer
+      - pass/fail gate
+      - CI integration
+    solves:
+      - silent behavior regressions after prompt, tool, or model changes
+    tradeoffs:
+      - suite coverage limits what regressions are caught
+      - scorer quality bounds trust in the gate
+    sources: []
+    notes: "Widely practiced via eval harnesses and CI gating; no single canonical academic primary source identified yet."
+
+  - name: Adversarial Red-Team / Injection-Regression Loop
+    category: evaluation_runtime
+    summary: The runtime periodically replays known and generated adversarial inputs (jailbreaks, injection payloads) against the agent and its guardrails to verify defenses still hold as prompts and models change.
+    loop_shape: generate/replay adversarial cases -> run through agent and guardrails -> classify bypass or blocked -> track regression over time
+    runtime_primitives:
+      - adversarial case library
+      - replay harness
+      - bypass classifier
+      - regression tracking
+    solves:
+      - prompt-injection and jailbreak defenses silently degrading after updates
+    tradeoffs:
+      - the case library must be refreshed as new attack patterns emerge
+      - narrow coverage creates a false sense of safety
+    sources:
+      - title: "OWASP LLM Prompt Injection Prevention Cheat Sheet"
+        url: "https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html"
+        type: guide
+    notes: "Complements the Prompt-Injection Action Firewall entry: that technique is the runtime defense, this technique is the loop that tests the defense stays effective."
+
+  - name: Parallel Tool-Call Fan-Out / Join
+    category: core_action_loop
+    summary: A single agent turn issues multiple independent tool calls concurrently and joins their results before continuing, instead of calling tools one at a time.
+    loop_shape: model emits N tool calls in one turn -> execute concurrently -> join results -> observe combined result -> continue
+    runtime_primitives:
+      - concurrent tool dispatch
+      - per-call timeout
+      - result join
+      - partial-failure handling
+    solves:
+      - latency from serial tool calls when calls are independent
+    tradeoffs:
+      - partial failures need a defined join policy
+      - concurrent calls can hit rate limits together
+    sources: []
+    notes: "Common production pattern in current tool-calling APIs; no single canonical primary source identified yet. Distinct from multi-agent fan-out, which distributes work across separate agents rather than tool calls within one turn."
+
+  - name: Workflow-Graph / State-Machine Runtime
+    category: harness_runtime
+    summary: Agent control flow is expressed as an explicit graph of nodes and conditional edges, compiled and executed by a runtime that supports persistence, streaming, and resumption at any node.
+    loop_shape: define nodes/edges -> compile graph -> execute from current node -> conditional routing -> checkpoint -> next node
+    runtime_primitives:
+      - node/edge graph definition
+      - conditional routing
+      - graph compiler
+      - per-node checkpoint
+      - resumable execution
+    solves:
+      - ad hoc control flow that becomes unreadable once branches, loops, and retries accumulate in plain code
+    tradeoffs:
+      - graph abstraction adds indirection for simple linear agents
+      - debugging requires graph-aware tooling
+    sources:
+      - title: "LangGraph overview"
+        url: "https://docs.langchain.com/oss/python/langgraph/overview"
+        type: docs
+    notes: "LangGraph is cited elsewhere in this repo only as a source for Task Queue and Durable Runtime entries; this entry names the underlying graph/state-machine execution model as its own reusable technique."
+
+  - name: Dynamic Workflow Generation
+    category: harness_runtime
+    summary: Instead of running a fixed hardcoded harness, the agent writes or selects the workflow/graph structure appropriate to the specific task before executing it.
+    loop_shape: task -> agent synthesizes workflow/harness for this task -> execute synthesized workflow -> result
+    runtime_primitives:
+      - workflow/harness synthesis step
+      - synthesized workflow validation
+      - execution of the generated workflow
+    solves:
+      - one-size-fits-all harnesses being a poor fit for tasks with very different shapes
+    tradeoffs:
+      - a badly synthesized workflow can be worse than a well-tuned fixed harness
+      - harder to audit than a fixed, reviewed workflow
+    sources:
+      - title: "Claude Opus 4.8 announcement"
+        url: "https://www.anthropic.com/news/claude-opus-4-8"
+        type: article
+    notes: "Emerging direction as of 2026; evidence is mostly product/demo-level so far."
+
+  - name: Contract-Net / Auction-Based Delegation
+    category: multi_agent_coordination
+    summary: Instead of a supervisor assigning tasks directly, agents bid on announced tasks based on estimated fit or cost, and the announcer awards the task to the best bid.
+    loop_shape: announce task -> agents submit bids -> award to best bid -> awarded agent executes -> report result
+    runtime_primitives:
+      - task announcement
+      - bid schema
+      - award policy
+      - execution report
+    solves:
+      - dynamic task allocation among peer agents without a fixed supervisor hierarchy
+    tradeoffs:
+      - bidding overhead is wasted when only one agent can plausibly do the task
+      - bid quality depends on accurate self-assessment
+    sources: []
+    notes: "Classical multi-agent-systems pattern (Contract Net Protocol, Smith 1980), promoted from the additional-runtime-patterns.md shortlist; no LLM-agent-specific primary source identified yet."
