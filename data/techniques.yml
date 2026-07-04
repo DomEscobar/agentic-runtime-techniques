@@ -1,0 +1,236 @@
+techniques:
+  - name: ReAct
+    category: core_action_loop
+    summary: Reasoning and acting are interleaved so the model can think, call a tool, observe the result, and continue.
+    loop_shape: reason -> act -> observe -> repeat
+    runtime_primitives:
+      - tool calls
+      - observations
+      - stop condition
+    solves:
+      - environment interaction
+      - stepwise tool use
+    tradeoffs:
+      - can drift in long contexts
+      - weak termination unless wrapped by another loop
+    sources:
+      - title: "ReAct: Synergizing Reasoning and Acting in Language Models"
+        url: "https://arxiv.org/abs/2210.03629"
+        type: paper
+
+  - name: Plan-and-Execute
+    category: planning_loop
+    summary: A planner decomposes the objective into steps and an executor carries them out, often revising the plan as new observations arrive.
+    loop_shape: plan -> execute -> observe -> replan -> repeat
+    runtime_primitives:
+      - plan artifact
+      - executor
+      - replanning trigger
+    solves:
+      - task decomposition
+      - long-horizon structure
+    tradeoffs:
+      - stale plans
+      - planner/executor mismatch
+    sources: []
+
+  - name: ReWOO
+    category: planning_loop
+    summary: Reasoning is separated from observations so plans can include variable references to future tool outputs.
+    loop_shape: plan with variables -> execute workers -> synthesize
+    runtime_primitives:
+      - planner
+      - worker calls
+      - variable binding
+    solves:
+      - tool-use planning
+      - reduced repeated reasoning
+    tradeoffs:
+      - less reactive during execution
+      - depends on plan quality
+    sources:
+      - title: "ReWOO: Decoupling Reasoning from Observations for Efficient Augmented Language Models"
+        url: "https://arxiv.org/abs/2305.18323"
+        type: paper
+
+  - name: Reflexion
+    category: reflection_loop
+    summary: The agent evaluates its own trajectory, stores verbal feedback, and uses that feedback on later attempts.
+    loop_shape: attempt -> evaluate -> reflect -> retry with memory
+    runtime_primitives:
+      - evaluator
+      - reflection memory
+      - retry
+    solves:
+      - learning across attempts without fine tuning
+      - self-correction
+    tradeoffs:
+      - memory can accumulate wrong lessons
+      - evaluator quality limits improvement
+    sources:
+      - title: "Reflexion: Language Agents with Verbal Reinforcement Learning"
+        url: "https://arxiv.org/abs/2303.11366"
+        type: paper
+
+  - name: Ralph Loop
+    category: bounded_retry_loop
+    summary: Agent execution is explicitly bounded so the system can rely on failure, retry, or escalation rather than unbounded wandering.
+    loop_shape: bounded attempt -> result/failure -> retry or escalate
+    runtime_primitives:
+      - step budget
+      - time or cost budget
+      - explicit failure
+      - fresh context
+    solves:
+      - infinite loops
+      - context exhaustion
+      - operational reliability
+    tradeoffs:
+      - may lose useful context between attempts
+      - needs good state handoff
+    sources:
+      - title: "The Ralph Loop"
+        url: "https://ghuntley.com/ralph/"
+        type: article
+
+  - name: RLM / CodeAct REPL Loop
+    category: repl_runtime_loop
+    summary: The agent writes executable code into a REPL to manipulate context, call tools, and orchestrate sub-operations.
+    loop_shape: write code -> execute -> inspect variables/output -> continue
+    runtime_primitives:
+      - REPL
+      - variables
+      - executable actions
+      - recursive model calls
+    solves:
+      - programmatic context manipulation
+      - complex tool orchestration
+    tradeoffs:
+      - ephemeral scripts unless persisted
+      - safety and sandboxing matter
+    sources:
+      - title: "Executable Code Actions Elicit Better LLM Agents"
+        url: "https://arxiv.org/abs/2402.01030"
+        type: paper
+
+  - name: Deep Research Loop
+    category: research_loop
+    summary: The system plans search queries, reads results, synthesizes findings, identifies gaps, and launches deeper query batches.
+    loop_shape: plan queries -> search -> read -> synthesize -> plan next queries
+    runtime_primitives:
+      - query planner
+      - web/search tools
+      - source extraction
+      - synthesis
+      - gap analysis
+    solves:
+      - open-ended research
+      - source-grounded synthesis
+    tradeoffs:
+      - source quality dominates answer quality
+      - can over-search without clear stopping criteria
+    sources:
+      - title: "Introducing Deep Research"
+        url: "https://openai.com/index/introducing-deep-research/"
+        type: article
+
+  - name: Codex Goal / Verifier Loop
+    category: verification_loop
+    summary: A goal is pursued through repeated execution and review until the objective is met, blocked, or failed.
+    loop_shape: execute -> verify -> continue/fix/complete/block
+    runtime_primitives:
+      - objective
+      - verifier
+      - completion criteria
+      - blocked state
+    solves:
+      - reliable task completion
+      - explicit termination
+    tradeoffs:
+      - verifier can miss defects
+      - objective wording matters
+    sources:
+      - title: "Using Goals in Codex"
+        url: "https://developers.openai.com/codex/cloud#goals"
+        type: docs
+
+  - name: Autoresearch
+    category: experiment_loop
+    summary: The system iteratively proposes experiments, runs them, evaluates outcomes, and keeps or reverts changes based on results.
+    loop_shape: propose -> run -> evaluate -> keep/revert -> repeat
+    runtime_primitives:
+      - experiment proposal
+      - isolated run
+      - metric evaluation
+      - history
+      - keep/revert decision
+    solves:
+      - open-ended optimization
+      - experiment hillclimbing
+    tradeoffs:
+      - metric design is critical
+      - exploration can get narrow
+    sources:
+      - title: "Autoresearch"
+        url: "https://github.com/karpathy/llm.c/discussions"
+        type: placeholder
+    notes: "Replace placeholder with the canonical source once identified."
+
+  - name: Planner / Executor Harness
+    category: multi_agent_loop
+    summary: Planner agents inspect state and produce tasks while executor agents perform tasks in parallel under fixed channels and guardrails.
+    loop_shape: inspect -> plan tasks -> execute in parallel -> review -> next tasks
+    runtime_primitives:
+      - planner role
+      - executor role
+      - task queue
+      - fixed channels
+      - reviewer
+    solves:
+      - parallel task execution
+      - role separation
+      - large-work coordination
+    tradeoffs:
+      - coordination overhead
+      - task boundaries can be wrong
+    sources: []
+
+  - name: Heartbeat / Checkpoint Loop
+    category: durable_runtime_loop
+    summary: A long-running agent periodically wakes, checks state or messages, emits structured checkpoints, and sleeps again.
+    loop_shape: load state -> check/work -> checkpoint -> sleep -> repeat
+    runtime_primitives:
+      - persistent state
+      - sleep
+      - checkpoint
+      - scheduler
+      - lifecycle control
+    solves:
+      - long-running agents
+      - operational visibility
+      - background task management
+    tradeoffs:
+      - durability model is hard
+      - state migrations and crash recovery matter
+    sources:
+      - title: "Designing a programmable runtime for agent orchestration"
+        url: "https://x.com/i/article/2073112080140689408"
+        type: article
+
+  - name: Implement / Review / Merge
+    category: coding_harness_loop
+    summary: A coding agent implements a change, runs checks, receives review, fixes issues, and merges or hands off the result.
+    loop_shape: implement -> test -> review -> fix -> merge/handoff
+    runtime_primitives:
+      - branch or worktree
+      - implementation agent
+      - tests
+      - reviewer agent
+      - merge or rollback
+    solves:
+      - safer code changes
+      - auditable iteration
+    tradeoffs:
+      - weak tests weaken the loop
+      - reviewer can share blind spots with implementer
+    sources: []
