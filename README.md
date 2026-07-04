@@ -38,6 +38,7 @@ Not included by default:
 - [Taxonomy](docs/taxonomy.md)
 - [Benchmark/date tier list](docs/tier-list.md)
 - [OpenClaw and Hermes technique notes](docs/openclaw-hermes-techniques.md)
+- [DeerFlow technique notes](docs/deer-flow-techniques.md)
 - [Machine-readable catalog](data/techniques.yml)
 - [Contribution guide](CONTRIBUTING.md)
 

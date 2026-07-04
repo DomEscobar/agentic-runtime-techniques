@@ -1,0 +1,108 @@
+status_date: "2026-07-04"
+source:
+  github: "https://github.com/bytedance/deer-flow"
+  local_clone: "/tmp/deer-flow"
+classification:
+  recommended_tier: "B"
+  reason: "High-signal engineering harness with many runtime primitives, but no single isolated public benchmark for the harness itself."
+techniques:
+  - name: Middleware-Composed Agent Runtime
+    category: runtime_composition
+    evidence:
+      - "backend/packages/harness/deerflow/agents/lead_agent/agent.py builds an ordered middleware chain around create_agent."
+  - name: ThreadState Extension With Reducers
+    category: typed_durable_state
+    evidence:
+      - "ThreadState extends AgentState with sandbox, artifacts, todos, goal, promoted tools, delegations, skill context, summary_text."
+      - "Reducers merge promoted tools, delegations, skill context, artifacts, and fail closed on conflicting sandbox IDs."
+  - name: Session Goal Evaluator Loop
+    category: goal_verifier_loop
+    evidence:
+      - "README documents /goal and hidden continuations."
+      - "runtime/goal.py defines typed blockers and continuation caps."
+  - name: Plan Mode Todo Loop
+    category: planning_progress_tracking
+    evidence:
+      - "TodoMiddleware gives the agent write_todos and enforces one in_progress task unless parallel work is justified."
+  - name: Progressive Skill Loading
+    category: context_budgeting
+    evidence:
+      - "README says skills are loaded progressively."
+      - "SkillActivationMiddleware injects full SKILL.md only for slash activation."
+  - name: Deferred Tool Discovery
+    category: tool_discovery
+    evidence:
+      - "tool_search hides MCP schemas until searched and promoted."
+      - "DeferredToolFilterMiddleware blocks calls to unpromoted deferred tools."
+  - name: Durable Context Middleware
+    category: durable_context
+    evidence:
+      - "Captures delegation ledger and loaded skill files, injects summary/ledger/skills as hidden durable-context data."
+  - name: Delegation Ledger
+    category: multi_agent_memory
+    evidence:
+      - "delegation_ledger.py extracts task tool calls and paired results and renders anti-repeat guidance."
+  - name: Subagent Task Tool
+    category: multi_agent_orchestration
+    evidence:
+      - "task_tool delegates to specialized subagents, polls background execution, streams task events, returns structured status."
+  - name: Subagent Lifecycle Control
+    category: lifecycle_control
+    evidence:
+      - "SubagentExecutor tracks pending/running/completed/failed/cancelled/timed_out and handles cancellation/cleanup."
+  - name: Subagent Token Attribution
+    category: cost_accounting
+    evidence:
+      - "task_tool caches/reports subagent token usage back to parent run."
+  - name: Sandbox Provider Abstraction
+    category: sandbox_runtime
+    evidence:
+      - "Architecture docs describe LocalSandboxProvider and AioSandboxProvider; code includes local, AIO, and E2B providers."
+  - name: Guardrail Middleware
+    category: tool_authorization
+    evidence:
+      - "GUARDRAILS.md documents pre-tool-call authorization, allowlist/OAP/custom providers, fail-closed behavior."
+  - name: Read-Before-Write Gate
+    category: file_version_gate
+    evidence:
+      - "ReadBeforeWriteMiddleware blocks writes to existing files unless current version was read; writes invalidate earlier read marks."
+  - name: Dangling Tool-Call Repair
+    category: provider_compatibility
+    evidence:
+      - "DanglingToolCallMiddleware inserts synthetic ToolMessages for interrupted or malformed tool calls."
+  - name: Tool Error Recovery
+    category: failure_recovery
+    evidence:
+      - "ToolErrorHandlingMiddleware converts tool exceptions into error ToolMessages so runs can continue."
+  - name: Safety Finish Reason Suppression
+    category: safety_gate
+    evidence:
+      - "SafetyFinishReasonMiddleware strips tool calls when providers safety-stop with partial tool calls."
+  - name: Loop Detection Circuit Breaker
+    category: loop_breaker
+    evidence:
+      - "LoopDetectionMiddleware hashes repeated tool call sets, warns, and hard-stops by stripping tool calls."
+  - name: Token Budget Circuit Breaker
+    category: budget_enforcement
+    evidence:
+      - "TokenBudgetMiddleware tracks per-run token usage and hard-stops when thresholds are exceeded."
+  - name: Dynamic Context Frozen Snapshot
+    category: context_injection
+    evidence:
+      - "DynamicContextMiddleware injects current date and memory while keeping the base system prompt static for prefix-cache reuse."
+  - name: Memory Update Queue
+    category: memory_update
+    evidence:
+      - "MemoryMiddleware queues filtered user/final assistant messages for debounced async memory update and detects correction/reinforcement."
+  - name: System Message Coalescing
+    category: provider_compatibility
+    evidence:
+      - "Lead agent installs SystemMessageCoalescingMiddleware for strict providers."
+  - name: Stream Bridge
+    category: streaming_replay
+    evidence:
+      - "Runtime includes memory and Redis stream bridge implementations."
+  - name: Support Bundle
+    category: diagnostics
+    evidence:
+      - "README describes redacted support bundles with issue summary, issue draft, triage JSON, and optional evidence zip."
