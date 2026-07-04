@@ -1,0 +1,153 @@
+status_date: "2026-07-04"
+scoring_note: "Tiers rank evidence strength and runtime relevance, not universal performance."
+tiers:
+  S:
+    meaning: "Strong primary benchmark evidence plus reusable runtime technique."
+    techniques:
+      - name: Least-to-Most Prompting
+        published: "2022-05"
+        area: query_decomposition
+        benchmark_signal: "99%+ on SCAN splits with few exemplars; strong compositional decomposition evidence."
+        sources:
+          - https://arxiv.org/abs/2205.10625
+      - name: ReAct
+        published: "2022-10"
+        area: core_action_loop
+        benchmark_signal: "HotpotQA, FEVER, ALFWorld, WebShop; strong interactive-task gains."
+        sources:
+          - https://arxiv.org/abs/2210.03629
+      - name: Reflexion
+        published: "2023-03"
+        area: reflection_memory_loop
+        benchmark_signal: "91% pass@1 on HumanEval reported; gains across coding, decision-making, and reasoning."
+        sources:
+          - https://arxiv.org/abs/2303.11366
+      - name: Tree of Thoughts
+        published: "2023-05"
+        area: search_planning_loop
+        benchmark_signal: "Game of 24: 74% versus 4% for GPT-4 CoT in paper setup."
+        sources:
+          - https://arxiv.org/abs/2305.10601
+          - https://github.com/princeton-nlp/tree-of-thought-llm
+      - name: Voyager
+        published: "2023-05"
+        area: lifelong_embodied_agent_loop
+        benchmark_signal: "Minecraft: 3.3x unique items, 2.3x travel, up to 15.3x faster milestones."
+        sources:
+          - https://arxiv.org/abs/2305.16291
+          - https://voyager.minedojo.org/
+      - name: CodeAct
+        published: "2024-02"
+        area: executable_code_action_loop
+        benchmark_signal: "API-Bank and curated benchmark; up to 20% higher success rate."
+        sources:
+          - https://arxiv.org/abs/2402.01030
+          - https://github.com/xingyaoww/code-act
+      - name: SWE-agent / ACI
+        published: "2024-05"
+        area: coding_harness
+        benchmark_signal: "SWE-bench 12.5%, HumanEvalFix 87.7% pass@1 at publication."
+        sources:
+          - https://arxiv.org/abs/2405.15793
+          - https://github.com/swe-agent/swe-agent
+  A:
+    meaning: "Good evidence or high runtime relevance, narrower or less directly comparable."
+    techniques:
+      - name: Self-Ask with Search
+        published: "2022-10"
+        area: query_analysis
+        benchmark_signal: "Compositional QA with explicit follow-up questions and search integration."
+        sources:
+          - https://arxiv.org/abs/2210.03350
+      - name: HyDE
+        published: "2022-12"
+        area: context_acquisition
+        benchmark_signal: "Zero-shot retrieval gains across web search, QA, fact verification, multilingual tasks."
+        sources:
+          - https://arxiv.org/abs/2212.10496
+      - name: Toolformer
+        published: "2023-02"
+        area: tool_use_learning
+        benchmark_signal: "Self-supervised tool-use learning across several APIs and downstream tasks."
+        sources:
+          - https://arxiv.org/abs/2302.04761
+      - name: ReWOO
+        published: "2023-05"
+        area: planning_without_observation
+        benchmark_signal: "5x token efficiency and 4% HotpotQA accuracy improvement reported."
+        sources:
+          - https://arxiv.org/abs/2305.18323
+      - name: Self-RAG
+        published: "2023-10"
+        area: adaptive_retrieval_critique
+        benchmark_signal: "Gains on open-domain QA, reasoning, fact verification, and long-form factuality."
+        sources:
+          - https://arxiv.org/abs/2310.11511
+      - name: Corrective RAG
+        published: "2024-01"
+        area: retrieval_correction_loop
+        benchmark_signal: "Four short/long-form generation datasets; improves RAG-based approaches."
+        sources:
+          - https://arxiv.org/abs/2401.15884
+      - name: CRAG Benchmark
+        published: "2024-06"
+        area: rag_evaluation
+        benchmark_signal: "Dynamic factual QA benchmark; exposes gap between LLMs and trustworthy RAG."
+        sources:
+          - https://arxiv.org/abs/2406.04744
+  B:
+    meaning: "Important but benchmark evidence is indirect, framework-level, or harder to isolate."
+    techniques:
+      - name: AutoGen multi-agent conversations
+        published: "2023-08"
+        area: multi_agent_orchestration
+        benchmark_signal: "Framework/example evidence across domains; less clean isolated benchmark signal."
+        sources:
+          - https://arxiv.org/abs/2308.08155
+      - name: MetaGPT SOP agents
+        published: "2023-08"
+        area: multi_agent_sop_workflow
+        benchmark_signal: "Collaborative software engineering tasks; framework and SOP effects are coupled."
+        sources:
+          - https://arxiv.org/abs/2308.00352
+      - name: Ralph Loop
+        published: "2024+"
+        area: bounded_retry_loop
+        benchmark_signal: "Practical coding-loop evidence; limited formal public benchmarks."
+        sources:
+          - https://ghuntley.com/ralph/
+          - https://github.com/andyrewlee/awesome-agent-orchestrators
+      - name: OpenAI Agents SDK primitives
+        published: "2025-03"
+        area: handoffs_guardrails_tracing_sessions
+        benchmark_signal: "Production runtime primitives; not a benchmark paper."
+        sources:
+          - https://openai.com/index/new-tools-for-building-agents/
+          - https://openai.github.io/openai-agents-python/
+      - name: LangGraph durable execution
+        published: "2024+"
+        area: durable_orchestration
+        benchmark_signal: "Explicit durable execution, persistence, streaming, human-in-the-loop features."
+        sources:
+          - https://docs.langchain.com/oss/python/langgraph/overview
+  C:
+    meaning: "Emerging or useful but currently weak public benchmark evidence."
+    techniques:
+      - name: Deep Research-style loops
+        published: "2025+"
+        area: research_loop
+        benchmark_signal: "Product-level evidence; reproducible public benchmark details vary."
+        sources:
+          - https://openai.com/index/introducing-deep-research/
+      - name: Onyx programs / heartbeat checkpoint loop
+        published: "2026-07"
+        area: programmable_agent_runtime
+        benchmark_signal: "Strong conceptual runtime primitives; no established public benchmark yet."
+        sources:
+          - https://x.com/i/article/2073112080140689408
+      - name: Dynamic workflow generation
+        published: "2026"
+        area: per_task_harness_synthesis
+        benchmark_signal: "Product/demo-level evidence so far."
+        sources:
+          - https://www.anthropic.com/news/claude-opus-4-8

@@ -1,0 +1,50 @@
+topic: agentic runtime techniques loops benchmarks release dates
+created_at: '2026-07-04T06:51:27.273627+00:00'
+depth: standard
+time_range: null
+entities: []
+entities:
+- ReAct
+- Least-to-Most Prompting
+- Self-Ask
+- HyDE
+- Toolformer
+- Reflexion
+- Tree of Thoughts
+- Voyager
+- ReWOO
+- AutoGen
+- MetaGPT
+- Self-RAG
+- Corrective RAG
+- CodeAct
+- SWE-agent
+- LangGraph
+- OpenAI Agents SDK
+- Onyx
+dimensions:
+- publication date
+- runtime area
+- benchmark or evaluation evidence
+- reusable technique strength
+- caveats and comparability
+queries:
+- ReAct paper arxiv benchmark ALFWorld WebShop HotpotQA FEVER date 2022
+- Reflexion language agents verbal reinforcement learning arxiv benchmarks HumanEval ALFWorld date
+- ReWOO decoupling reasoning from observations arxiv benchmarks date
+- Tree of Thoughts deliberate problem solving arxiv benchmark game of 24 crossword date
+- Voyager open ended embodied agent with large language models minecraft arxiv benchmark date
+- SWE-agent paper SWE-bench benchmark release date arxiv
+- CodeAct executable code actions elicit better LLM agents arxiv benchmark date
+- Self-Ask with Search arxiv date benchmark compositional questions
+- HyDE precise zero-shot dense retrieval arxiv date benchmark
+- LangGraph agent runtime durable execution human in loop persistence date docs
+source_policy:
+  max_sources: 30
+  prefer_primary: true
+  allow_browser: true
+  allow_scrapling: true
+unknowns:
+- Benchmarks are not directly comparable across QA, coding, RAG, Minecraft, and orchestration.
+- Some production runtime techniques have strong engineering relevance but weak public benchmark evidence.
+- OpenAI blog pages returned HTTP 403 to the local artifact fetcher, though official URLs are retained.

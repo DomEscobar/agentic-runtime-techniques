@@ -36,6 +36,7 @@ Not included by default:
 ## Start Here
 
 - [Taxonomy](docs/taxonomy.md)
+- [Benchmark/date tier list](docs/tier-list.md)
 - [Machine-readable catalog](data/techniques.yml)
 - [Contribution guide](CONTRIBUTING.md)
 
