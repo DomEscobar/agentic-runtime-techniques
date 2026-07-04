@@ -36,6 +36,7 @@ Not included by default:
 ## Start Here
 
 - [Taxonomy](docs/taxonomy.md)
+- [ASCII flow diagrams](docs/flow-diagrams.md)
 - [Benchmark/date tier list](docs/tier-list.md)
 - [OpenClaw and Hermes technique notes](docs/openclaw-hermes-techniques.md)
 - [DeerFlow technique notes](docs/deer-flow-techniques.md)
